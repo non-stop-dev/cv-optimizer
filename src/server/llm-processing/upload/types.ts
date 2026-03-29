@@ -14,6 +14,8 @@ export interface UploadValidationContext {
 	sizeInBytes: number;
 }
 
+export type TargetPositions = string[];
+
 export interface SanitizedUploadResult {
 	format: SupportedDocumentFormat;
 	originalFileName: string;
@@ -23,4 +25,5 @@ export interface SanitizedUploadResult {
 	sanitizedContent: string;
 	summary: string;
 	contentHash: string;
+	targetPositions: TargetPositions;
 }

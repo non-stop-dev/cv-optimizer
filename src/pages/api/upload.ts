@@ -8,6 +8,7 @@ import {
 import { UploadSanitizationError } from '../../server/llm-processing/upload/errors';
 import { sanitizeHtmlDocument } from '../../server/llm-processing/upload/sanitizers/html';
 import { sanitizeUploadedDocument } from '../../server/llm-processing/upload/sanitizeUploadedDocument';
+import { parseTargetPositionsFromFormData } from '../../server/llm-processing/upload/validators';
 
 export const prerender = false;
 
@@ -121,7 +122,20 @@ export const POST: APIRoute = async ({ request }) => {
 	);
 
 	try {
-		const sanitizedDocument = await sanitizeUploadedDocument(candidate);
+		const targetPositions = parseTargetPositionsFromFormData(formData.get('targetPositions'));
+		logDevelopment(
+			'Target positions received',
+			JSON.stringify(
+				{
+					targetPositions,
+					count: targetPositions.length
+				},
+				null,
+				2
+			)
+		);
+
+		const sanitizedDocument = await sanitizeUploadedDocument(candidate, targetPositions);
 
 		logDevelopment(
 			'Sanitized document',
@@ -141,7 +155,10 @@ export const POST: APIRoute = async ({ request }) => {
 
 		// Dispara el flujo de optimización con Gemini
 		const configuredModels = gemini.getConfiguredModels();
-		const optimizedHTML = await gemini.optimizeCV(sanitizedDocument.sanitizedContent);
+		const optimizedHTML = await gemini.optimizeCV(
+			sanitizedDocument.sanitizedContent,
+			sanitizedDocument.targetPositions
+		);
 		const safeOptimizedHTML = sanitizeHtmlDocument(optimizedHTML);
 
 		if (!safeOptimizedHTML.trim()) {
@@ -167,6 +184,7 @@ export const POST: APIRoute = async ({ request }) => {
 				sizeInBytes: sanitizedDocument.sizeInBytes,
 				summary: sanitizedDocument.summary,
 				contentHash: sanitizedDocument.contentHash,
+				targetPositions: sanitizedDocument.targetPositions,
 				optimizedHTML: safeOptimizedHTML, // Contenido enriquecido por la IA
 				models: configuredModels
 			}

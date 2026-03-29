@@ -10,4 +10,5 @@ export interface HistoryEntry {
 	contentHash: string;
 	optimizedHTML: string;
 	primaryColor: string;
+	targetPositions: string[];
 }

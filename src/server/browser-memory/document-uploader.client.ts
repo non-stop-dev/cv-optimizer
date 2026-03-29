@@ -23,6 +23,8 @@ import { clearHistoryEntries, readHistoryEntries, writeHistoryEntry } from './hi
 
 const PREVIEW_SELECTOR = '[data-upload-result-preview]';
 const DEFAULT_PRIMARY_COLOR = '#0f766e';
+const MAX_TARGET_POSITIONS = 3;
+const MAX_TARGET_POSITION_LENGTH = 80;
 
 type StatusTone = 'proceso' | 'exito' | 'error';
 
@@ -36,6 +38,7 @@ interface SaveHistoryPayload {
 	contentHash: string;
 	optimizedHTML: string;
 	primaryColor: string;
+	targetPositions: string[];
 }
 
 const form = document.querySelector('[data-upload-form]');
@@ -57,6 +60,10 @@ const cvPrimaryColorPicker = document.querySelector('[data-cv-primary-color]');
 const exportHtmlButton = document.querySelector('[data-cv-export-html]');
 const exportTxtButton = document.querySelector('[data-cv-export-txt]');
 const exportPdfButton = document.querySelector('[data-cv-export-pdf]');
+const targetPositionInput = document.querySelector('[data-target-position-input]');
+const targetPositionsHiddenInput = document.querySelector('[data-target-positions-hidden]');
+const targetPositionsChips = document.querySelector('[data-target-positions-chips]');
+const targetPositionsFeedback = document.querySelector('[data-target-positions-feedback]');
 
 if (
 	!(form instanceof HTMLFormElement) ||
@@ -77,7 +84,11 @@ if (
 	!(cvPrimaryColorPicker instanceof HTMLInputElement) ||
 	!(exportHtmlButton instanceof HTMLButtonElement) ||
 	!(exportTxtButton instanceof HTMLButtonElement) ||
-	!(exportPdfButton instanceof HTMLButtonElement)
+	!(exportPdfButton instanceof HTMLButtonElement) ||
+	!(targetPositionInput instanceof HTMLInputElement) ||
+	!(targetPositionsHiddenInput instanceof HTMLInputElement) ||
+	!(targetPositionsChips instanceof HTMLElement) ||
+	!(targetPositionsFeedback instanceof HTMLElement)
 ) {
 	throw new Error('No se pudo inicializar el componente de carga de documentos.');
 }
@@ -88,6 +99,169 @@ let activeStageKey: StageKey | null = null;
 let lastSelectedFile: File | null = null;
 let currentDocumentBaseName = 'cv-optimizado';
 let historyEntries: HistoryEntry[] = [];
+let targetPositions: string[] = [];
+
+const normalizeTargetPosition = (value: string): string => {
+	return value.trim().replace(/\s+/g, ' ');
+};
+
+const toTargetPositionKey = (value: string): string => {
+	return value.toLocaleLowerCase('es-ES');
+};
+
+const setTargetPositionsFeedback = (message: string): void => {
+	targetPositionsFeedback.textContent = message;
+};
+
+const updateTargetPositionsFeedback = (): void => {
+	if (targetPositions.length === 0) {
+		setTargetPositionsFeedback('Puedes agregar hasta 3 posiciones.');
+		return;
+	}
+
+	if (targetPositions.length >= MAX_TARGET_POSITIONS) {
+		setTargetPositionsFeedback('Llegaste al maximo de 3 posiciones.');
+		return;
+	}
+
+	setTargetPositionsFeedback(
+		`${targetPositions.length} de ${MAX_TARGET_POSITIONS} posiciones agregadas.`
+	);
+};
+
+const syncTargetPositionsHiddenInput = (): void => {
+	targetPositionsHiddenInput.value = JSON.stringify(targetPositions);
+};
+
+const renderTargetPositionChips = (): void => {
+	targetPositionsChips.innerHTML = '';
+
+	for (const [index, position] of targetPositions.entries()) {
+		const item = document.createElement('li');
+		item.dataset.targetPositionChip = '';
+
+		const label = document.createElement('span');
+		label.textContent = position;
+
+		const removeButton = document.createElement('button');
+		removeButton.type = 'button';
+		removeButton.dataset.targetPositionChipRemove = '';
+		removeButton.dataset.targetPositionRemoveIndex = String(index);
+		removeButton.ariaLabel = `Eliminar posicion ${position}`;
+		removeButton.textContent = 'x';
+		removeButton.disabled = submitButton.disabled;
+
+		item.append(label, removeButton);
+		targetPositionsChips.appendChild(item);
+	}
+};
+
+const applyTargetPositions = (nextTargetPositions: string[]): void => {
+	targetPositions = nextTargetPositions;
+	renderTargetPositionChips();
+	syncTargetPositionsHiddenInput();
+	updateTargetPositionsFeedback();
+};
+
+const toNormalizedUniqueTargetPositions = (values: string[]): string[] => {
+	const uniqueTargetPositions: string[] = [];
+	const seen = new Set<string>();
+
+	for (const rawValue of values) {
+		const normalizedValue = normalizeTargetPosition(rawValue);
+		if (!normalizedValue) {
+			continue;
+		}
+
+		const normalizedKey = toTargetPositionKey(normalizedValue);
+		if (seen.has(normalizedKey)) {
+			continue;
+		}
+
+		seen.add(normalizedKey);
+		uniqueTargetPositions.push(normalizedValue);
+
+		if (uniqueTargetPositions.length === MAX_TARGET_POSITIONS) {
+			break;
+		}
+	}
+
+	return uniqueTargetPositions;
+};
+
+const addTargetPosition = (rawValue: string): void => {
+	const normalizedValue = normalizeTargetPosition(rawValue);
+	if (!normalizedValue) {
+		return;
+	}
+
+	if (normalizedValue.length > MAX_TARGET_POSITION_LENGTH) {
+		setTargetPositionsFeedback(
+			`Cada posicion puede tener hasta ${MAX_TARGET_POSITION_LENGTH} caracteres.`
+		);
+		return;
+	}
+
+	const normalizedKey = toTargetPositionKey(normalizedValue);
+	if (targetPositions.some((position) => toTargetPositionKey(position) === normalizedKey)) {
+		setTargetPositionsFeedback('Esa posicion ya esta agregada.');
+		return;
+	}
+
+	if (targetPositions.length >= MAX_TARGET_POSITIONS) {
+		setTargetPositionsFeedback('Llegaste al maximo de 3 posiciones.');
+		targetPositionInput.value = '';
+		return;
+	}
+
+	applyTargetPositions([...targetPositions, normalizedValue]);
+};
+
+const consumeTargetPositionsFromCommaInput = (): void => {
+	if (!targetPositionInput.value.includes(',')) {
+		return;
+	}
+
+	const chunks = targetPositionInput.value.split(',');
+	const pendingChunk = chunks.pop() ?? '';
+	for (const chunk of chunks) {
+		addTargetPosition(chunk);
+	}
+
+	if (targetPositions.length >= MAX_TARGET_POSITIONS) {
+		targetPositionInput.value = '';
+		return;
+	}
+
+	targetPositionInput.value = pendingChunk;
+};
+
+const flushPendingTargetPosition = (): void => {
+	const pendingValue = normalizeTargetPosition(targetPositionInput.value);
+	targetPositionInput.value = '';
+	if (!pendingValue) {
+		updateTargetPositionsFeedback();
+		return;
+	}
+
+	if (pendingValue.includes(',')) {
+		for (const chunk of pendingValue.split(',')) {
+			addTargetPosition(chunk);
+		}
+		return;
+	}
+
+	addTargetPosition(pendingValue);
+};
+
+const toTargetPositionsFromPayload = (value: unknown): string[] => {
+	if (!Array.isArray(value)) {
+		return [];
+	}
+
+	const asStrings = value.filter((entry): entry is string => typeof entry === 'string');
+	return toNormalizedUniqueTargetPositions(asStrings);
+};
 
 const setStatus = (tone: StatusTone, title: string, message: string): void => {
 	statusContainer.hidden = false;
@@ -208,7 +382,8 @@ const saveCurrentVersionToHistory = async ({
 	summary,
 	contentHash,
 	optimizedHTML,
-	primaryColor
+	primaryColor,
+	targetPositions
 }: SaveHistoryPayload): Promise<string> => {
 	const safeOptimizedHtml = sanitizeCvHtml(optimizedHTML);
 	if (!safeOptimizedHtml.trim()) {
@@ -229,7 +404,8 @@ const saveCurrentVersionToHistory = async ({
 			summary,
 			contentHash,
 			optimizedHTML: safeOptimizedHtml,
-			primaryColor
+			primaryColor,
+			targetPositions
 		},
 		HISTORY_MAX_ENTRIES
 	);
@@ -241,7 +417,14 @@ const setLoadingState = (isLoading: boolean): void => {
 	input.disabled = isLoading;
 	submitButton.disabled = isLoading;
 	retryButton.disabled = isLoading;
-	submitButton.textContent = isLoading ? 'Subiendo...' : 'Subir';
+	targetPositionInput.disabled = isLoading;
+	submitButton.textContent = isLoading ? 'Generando...' : 'Generar CV optimizado';
+
+	for (const removeButton of targetPositionsChips.querySelectorAll('[data-target-position-chip-remove]')) {
+		if (removeButton instanceof HTMLButtonElement) {
+			removeButton.disabled = isLoading;
+		}
+	}
 };
 
 const updateFileNameLabel = (): void => {
@@ -323,6 +506,8 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 		return;
 	}
 	completeStage('validating');
+	flushPendingTargetPosition();
+	const requestTargetPositions = [...targetPositions];
 
 	setLoadingState(true);
 	setStatus('proceso', 'Procesando CV', 'Estamos trabajando en tu documento.');
@@ -331,6 +516,7 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 	try {
 		const body = new FormData();
 		body.append('document', file);
+		body.append('targetPositions', JSON.stringify(requestTargetPositions));
 
 		const response = await fetch('/api/upload', { method: 'POST', body });
 		completeStage('uploading');
@@ -359,6 +545,11 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 			throw new UploadFlowError('La respuesta de IA llego vacia.', 'AI_EMPTY_RESPONSE');
 		}
 
+		const normalizedTargetPositions = Array.isArray(payload?.data?.targetPositions)
+			? toTargetPositionsFromPayload(payload?.data?.targetPositions)
+			: requestTargetPositions;
+		applyTargetPositions(normalizedTargetPositions);
+
 		showResult(optimizedHTML);
 
 		let createdHistoryId: string | null = null;
@@ -373,7 +564,8 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 				summary: typeof payload?.data?.summary === 'string' ? payload.data.summary : '',
 				contentHash: typeof payload?.data?.contentHash === 'string' ? payload.data.contentHash : '',
 				optimizedHTML,
-				primaryColor: cvPrimaryColorPicker.value
+				primaryColor: cvPrimaryColorPicker.value,
+				targetPositions: normalizedTargetPositions
 			});
 		} catch (historyError) {
 			console.error('No se pudo guardar la version en historial local.', historyError);
@@ -406,6 +598,49 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 input.addEventListener('change', updateFileNameLabel);
 resultPreview.addEventListener('input', syncRawHtmlPanel);
 
+targetPositionInput.addEventListener('input', () => {
+	consumeTargetPositionsFromCommaInput();
+});
+
+targetPositionInput.addEventListener('blur', () => {
+	flushPendingTargetPosition();
+});
+
+targetPositionInput.addEventListener('keydown', (event) => {
+	if (event.key !== 'Enter') {
+		return;
+	}
+
+	event.preventDefault();
+	flushPendingTargetPosition();
+});
+
+targetPositionsChips.addEventListener('click', (event) => {
+	const target = event.target;
+	if (!(target instanceof HTMLElement)) {
+		return;
+	}
+
+	const removeButton = target.closest('[data-target-position-remove-index]');
+	if (!(removeButton instanceof HTMLButtonElement)) {
+		return;
+	}
+
+	if (removeButton.disabled) {
+		return;
+	}
+
+	const index = Number.parseInt(removeButton.dataset.targetPositionRemoveIndex ?? '', 10);
+	if (!Number.isInteger(index) || index < 0 || index >= targetPositions.length) {
+		return;
+	}
+
+	const nextPositions = [...targetPositions];
+	nextPositions.splice(index, 1);
+	applyTargetPositions(nextPositions);
+	targetPositionInput.focus();
+});
+
 cvPrimaryColorPicker.addEventListener('input', (event) => {
 	const target = event.currentTarget;
 	if (!(target instanceof HTMLInputElement)) {
@@ -421,6 +656,7 @@ exportPdfButton.addEventListener('click', exportCurrentPdf);
 
 form.addEventListener('submit', async (event) => {
 	event.preventDefault();
+	flushPendingTargetPosition();
 	const selectedFile = input.files?.[0] ?? lastSelectedFile;
 	await uploadDocument(selectedFile);
 });
@@ -484,4 +720,5 @@ historyClearButton.addEventListener('click', async () => {
 	}
 });
 
+applyTargetPositions([]);
 void refreshHistory();

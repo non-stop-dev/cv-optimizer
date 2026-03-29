@@ -8,6 +8,7 @@ import { sanitizeYamlDocument } from './sanitizers/yaml';
 import type {
 	SanitizedUploadResult,
 	SupportedDocumentFormat,
+	TargetPositions,
 	UploadValidationContext
 } from './types';
 import { assertUploadIsAllowed } from './validators';
@@ -38,7 +39,8 @@ const summarizeSanitization = (
 };
 
 export const sanitizeUploadedDocument = async (
-	file: File
+	file: File,
+	targetPositions: TargetPositions = []
 ): Promise<SanitizedUploadResult> => {
 	const context = assertUploadIsAllowed(file);
 	const bytes = new Uint8Array(await file.arrayBuffer());
@@ -81,6 +83,7 @@ export const sanitizeUploadedDocument = async (
 		sizeInBytes: context.sizeInBytes,
 		sanitizedContent,
 		summary: summarizeSanitization(context, sanitizedContent),
-		contentHash: createHash('sha256').update(sanitizedContent, 'utf-8').digest('hex')
+		contentHash: createHash('sha256').update(sanitizedContent, 'utf-8').digest('hex'),
+		targetPositions
 	};
 };

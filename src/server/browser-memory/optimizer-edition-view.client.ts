@@ -324,24 +324,37 @@ const loadEntry = async (): Promise<void> => {
 			return;
 		}
 
-		currentEntry = entry;
+		const normalizedEntry: HistoryEntry = {
+			...entry,
+			targetPositions: Array.isArray(entry.targetPositions) ? entry.targetPositions : []
+		};
+
+		currentEntry = normalizedEntry;
 		currentDocumentBaseName =
-			(entry.sourceFileName || entry.safeFileName || 'cv-optimizado').replace(/\.[^.]+$/, '');
+			(normalizedEntry.sourceFileName || normalizedEntry.safeFileName || 'cv-optimizado').replace(
+				/\.[^.]+$/,
+				''
+			);
 
 		const selectedColor =
-			typeof entry.primaryColor === 'string' && entry.primaryColor.length > 0
-				? entry.primaryColor
+			typeof normalizedEntry.primaryColor === 'string' && normalizedEntry.primaryColor.length > 0
+				? normalizedEntry.primaryColor
 				: DEFAULT_PRIMARY_COLOR;
 		cvPrimaryColorPicker.value = selectedColor;
-		showResult(entry.optimizedHTML);
+		showResult(normalizedEntry.optimizedHTML);
 		applyPreviewPrimaryColor(selectedColor);
 
 		undoRedo.clear();
 		captureSnapshotNow();
 		updateUndoRedoButtons();
 
-		const sourceName = entry.sourceFileName || entry.safeFileName || 'CV sin nombre';
-		outputMeta.textContent = `Version: ${sourceName}`;
+		const sourceName =
+			normalizedEntry.sourceFileName || normalizedEntry.safeFileName || 'CV sin nombre';
+		const positionsLabel =
+			normalizedEntry.targetPositions.length > 0
+				? ` | Posiciones objetivo: ${normalizedEntry.targetPositions.join(', ')}`
+				: '';
+		outputMeta.textContent = `Version: ${sourceName}${positionsLabel}`;
 		setStatus('exito', 'Version lista', 'Puedes editar el CV y exportarlo en el formato que prefieras.');
 		setSaveIndicator('saved', 'Autoguardado');
 	} catch (error) {

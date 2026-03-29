@@ -4,6 +4,8 @@ export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_TEXT_CONTENT_LENGTH = 400_000;
 export const MAX_YAML_DEPTH = 14;
 export const MAX_PDF_PAGES = 35;
+export const MAX_TARGET_POSITIONS = 3;
+export const MAX_TARGET_POSITION_LENGTH = 80;
 
 export const PDF_DANGEROUS_MARKERS: readonly string[] = [
 	'/JavaScript',

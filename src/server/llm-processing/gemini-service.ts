@@ -7,6 +7,7 @@ import { buildGenerationConfig, resolveGeminiRuntimeConfig } from './gemini-conf
 import { GeminiConfigurationError, GeminiRequestError } from './gemini-errors';
 import { optimizeCvWithGemini } from './gemini-optimize-cv';
 import { GEMINI_CV_OPTIMIZER_SYSTEM_PROMPT } from './gemini-system-prompt';
+import type { TargetPositions } from './upload/types';
 
 type CodingEnvironment = 'development' | 'production';
 
@@ -103,7 +104,7 @@ class GeminiService {
 	 * Procesa el contenido del CV para optimizarlo
 	 * @param content Texto sanitizado del CV
 	 */
-	public async optimizeCV(content: string): Promise<string> {
+	public async optimizeCV(content: string, targetPositions: TargetPositions = []): Promise<string> {
 		const client = this.getClient();
 		try {
 			return await optimizeCvWithGemini({
@@ -112,6 +113,7 @@ class GeminiService {
 				generationConfig: this.generationConfig,
 				systemPrompt: GEMINI_CV_OPTIMIZER_SYSTEM_PROMPT,
 				content,
+				targetPositions,
 				logDevelopment: this.logDevelopment.bind(this),
 				runtimeMetadata: this.runtimeMetadata
 			});

@@ -81,7 +81,8 @@ beforeEach(() => {
 		summary: 'Resumen',
 		contentHash: 'hash',
 		optimizedHTML: '<p>Original</p>',
-		primaryColor: '#0f766e'
+		primaryColor: '#0f766e',
+		targetPositions: ['Analista de datos']
 	});
 	mocks.upsertHistoryEntry.mockResolvedValue(undefined);
 });
@@ -125,7 +126,8 @@ describe('optimizer-edition-view client flow', () => {
 		expect(mocks.upsertHistoryEntry).toHaveBeenLastCalledWith(
 			expect.objectContaining({
 				optimizedHTML: '<p>Editado</p>',
-				primaryColor: '#0f766e'
+				primaryColor: '#0f766e',
+				targetPositions: ['Analista de datos']
 			})
 		);
 		expect(saveIndicator?.textContent).toBe('Autoguardado');

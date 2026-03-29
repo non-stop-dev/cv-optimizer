@@ -1,5 +1,7 @@
 import {
 	FORMAT_CONFIGURATIONS,
+	MAX_TARGET_POSITION_LENGTH,
+	MAX_TARGET_POSITIONS,
 	MAX_UPLOAD_SIZE_BYTES
 } from './constants';
 import { UploadSanitizationError } from './errors';
@@ -37,6 +39,104 @@ const isMimeAllowed = (
 	}
 
 	return configuration.mimeTypes.includes(mimeType);
+};
+
+const normalizeTargetPosition = (value: string): string => {
+	return value.trim().replace(/\s+/g, ' ');
+};
+
+const toTargetPositionKey = (value: string): string => {
+	return value.toLocaleLowerCase('es-ES');
+};
+
+const parseTargetPositionsPayload = (rawValue: FormDataEntryValue | null): unknown[] => {
+	if (rawValue === null) {
+		return [];
+	}
+
+	if (typeof rawValue !== 'string') {
+		throw new UploadSanitizationError({
+			code: 'INVALID_REQUEST',
+			statusCode: 400,
+			message: 'El campo targetPositions debe enviarse como texto JSON.'
+		});
+	}
+
+	const trimmedValue = rawValue.trim();
+	if (!trimmedValue) {
+		return [];
+	}
+
+	let parsedValue: unknown;
+	try {
+		parsedValue = JSON.parse(trimmedValue);
+	} catch (error) {
+		throw new UploadSanitizationError({
+			code: 'INVALID_REQUEST',
+			statusCode: 400,
+			message: 'El campo targetPositions no tiene un formato valido.',
+			cause: error
+		});
+	}
+
+	if (!Array.isArray(parsedValue)) {
+		throw new UploadSanitizationError({
+			code: 'INVALID_REQUEST',
+			statusCode: 400,
+			message: 'El campo targetPositions debe ser un arreglo JSON.'
+		});
+	}
+
+	return parsedValue;
+};
+
+export const parseTargetPositionsFromFormData = (
+	rawValue: FormDataEntryValue | null
+): string[] => {
+	const parsedValues = parseTargetPositionsPayload(rawValue);
+	const uniquePositions: string[] = [];
+	const seenPositions = new Set<string>();
+
+	for (const parsedValue of parsedValues) {
+		if (typeof parsedValue !== 'string') {
+			throw new UploadSanitizationError({
+				code: 'INVALID_REQUEST',
+				statusCode: 400,
+				message: 'Cada posicion debe ser texto.'
+			});
+		}
+
+		const normalizedValue = normalizeTargetPosition(parsedValue);
+		if (!normalizedValue) {
+			continue;
+		}
+
+		if (normalizedValue.length > MAX_TARGET_POSITION_LENGTH) {
+			throw new UploadSanitizationError({
+				code: 'INVALID_REQUEST',
+				statusCode: 400,
+				message: `Cada posicion puede tener hasta ${MAX_TARGET_POSITION_LENGTH} caracteres.`
+			});
+		}
+
+		const normalizedKey = toTargetPositionKey(normalizedValue);
+		if (seenPositions.has(normalizedKey)) {
+			continue;
+		}
+
+		seenPositions.add(normalizedKey);
+		uniquePositions.push(normalizedValue);
+
+		if (uniquePositions.length > MAX_TARGET_POSITIONS) {
+			throw new UploadSanitizationError({
+				code: 'INVALID_REQUEST',
+				statusCode: 400,
+				message: `Puedes enviar un maximo de ${MAX_TARGET_POSITIONS} posiciones objetivo.`
+			});
+		}
+	}
+
+	return uniquePositions;
 };
 
 export const toSafeFileName = (fileName: string): string => {

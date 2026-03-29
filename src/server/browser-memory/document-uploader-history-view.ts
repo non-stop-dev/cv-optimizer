@@ -35,7 +35,11 @@ export const renderHistoryList = ({
 			typeof entry.inputSizeInBytes === 'number'
 				? ` | ${(entry.inputSizeInBytes / 1024).toFixed(1)} KB`
 				: '';
-		info.textContent = `${(entry.format || 'txt').toUpperCase()} | ${toDisplayDate(entry.createdAt)}${sizeLabel}`;
+		const positionsLabel =
+			Array.isArray(entry.targetPositions) && entry.targetPositions.length > 0
+				? ` | Posiciones: ${entry.targetPositions.join(', ')}`
+				: '';
+		info.textContent = `${(entry.format || 'txt').toUpperCase()} | ${toDisplayDate(entry.createdAt)}${sizeLabel}${positionsLabel}`;
 
 		meta.append(fileName, info);
 

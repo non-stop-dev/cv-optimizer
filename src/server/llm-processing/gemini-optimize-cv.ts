@@ -4,6 +4,7 @@ import type {
 	GoogleGenAI
 } from '@google/genai';
 import { GeminiRequestError } from './gemini-errors';
+import type { TargetPositions } from './upload/types';
 
 interface OptimizeCvWithGeminiParams {
 	client: GoogleGenAI;
@@ -11,6 +12,7 @@ interface OptimizeCvWithGeminiParams {
 	generationConfig: GenerateContentConfig;
 	systemPrompt: string;
 	content: string;
+	targetPositions: TargetPositions;
 	logDevelopment: (title: string, payload: string) => void;
 	runtimeMetadata: {
 		codingEnvironment: string;
@@ -24,15 +26,49 @@ interface OptimizeCvWithGeminiParams {
 	};
 }
 
+const normalizeModelMessage = (value: string): string => {
+	return value
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map((line) => line.trimEnd())
+		.join('\n')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
+};
+
+const buildUserContent = (content: string, targetPositions: TargetPositions): string => {
+	const normalizedContent = normalizeModelMessage(content);
+
+	if (targetPositions.length === 0) {
+		return normalizedContent;
+	}
+
+	const positionsList = targetPositions
+		.map((position, index) => `${index + 1}. ${normalizeModelMessage(position).replace(/\n+/g, ' ')}`)
+		.join('\n');
+
+	return normalizeModelMessage([
+		'Target positions to optimize for (without inventing experience):',
+		positionsList,
+		'',
+		'CV source content:',
+		normalizedContent
+	].join('\n'));
+};
+
 export const optimizeCvWithGemini = async ({
 	client,
 	generationModelName,
 	generationConfig,
 	systemPrompt,
 	content,
+	targetPositions,
 	logDevelopment,
 	runtimeMetadata
 }: OptimizeCvWithGeminiParams): Promise<string> => {
+	const userContent = buildUserContent(content, targetPositions);
+	const normalizedSystemPrompt = normalizeModelMessage(systemPrompt);
+
 	logDevelopment(
 		'Gemini request metadata',
 		JSON.stringify(
@@ -40,26 +76,29 @@ export const optimizeCvWithGemini = async ({
 				codingEnvironment: runtimeMetadata.codingEnvironment,
 				generationModel: runtimeMetadata.generationModel,
 				processingModel: runtimeMetadata.processingModel,
-				contentLength: content.length,
+				rawContentLength: content.length,
+				normalizedContentLength: userContent.length,
 				maxOutputTokens: runtimeMetadata.maxOutputTokens,
 				temperature: runtimeMetadata.temperature,
 				topP: runtimeMetadata.topP,
 				thinkingLevel: runtimeMetadata.thinkingLevel,
-				googleSearchToolEnabled: runtimeMetadata.googleSearchToolEnabled
+				googleSearchToolEnabled: runtimeMetadata.googleSearchToolEnabled,
+				targetPositions,
+				targetPositionsCount: targetPositions.length
 			},
 			null,
 			2
 		)
 	);
-	logDevelopment('System prompt', systemPrompt);
-	logDevelopment('Content sent to AI', content);
+	logDevelopment('System prompt', normalizedSystemPrompt);
+	logDevelopment('Content sent to AI', userContent);
 
 	const req: GenerateContentParameters = {
 		model: generationModelName,
-		contents: [{ role: 'user', parts: [{ text: content }] }],
+		contents: [{ role: 'user', parts: [{ text: userContent }] }],
 		config: {
 			...generationConfig,
-			systemInstruction: systemPrompt
+			systemInstruction: normalizedSystemPrompt
 		}
 	};
 
