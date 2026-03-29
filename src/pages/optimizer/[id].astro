@@ -25,7 +25,12 @@ const safeEntryId = typeof id === 'string' ? id : '';
 						>
 							Volver
 						</a>
-						<p data-output-meta class="text-sm text-(--ink-soft)">Cargando version...</p>
+						<div class="flex flex-col items-end text-right">
+							<p data-output-meta class="text-sm text-(--ink-soft)">Cargando version...</p>
+							<p data-output-save-indicator data-state="idle" class="mt-1 text-xs text-(--ink-soft)">
+								Autoguardado desactivado.
+							</p>
+						</div>
 					</div>
 
 					<aside
@@ -58,6 +63,20 @@ const safeEntryId = typeof id === 'string' ? id : '';
 									class="h-7 w-7 cursor-pointer rounded border-0 bg-transparent p-0"
 								/>
 							</label>
+							<button
+								type="button"
+								data-cv-undo
+								class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface) disabled:cursor-not-allowed disabled:opacity-55"
+							>
+								Deshacer
+							</button>
+							<button
+								type="button"
+								data-cv-redo
+								class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface) disabled:cursor-not-allowed disabled:opacity-55"
+							>
+								Rehacer
+							</button>
 							<button
 								type="button"
 								data-cv-export-html
@@ -150,6 +169,18 @@ const safeEntryId = typeof id === 'string' ? id : '';
 		background: color-mix(in srgb, var(--brand-cv), white 90%);
 	}
 
+	[data-output-save-indicator][data-state='saving'] {
+		color: color-mix(in srgb, var(--brand-optimizer), #0b5e57 48%);
+	}
+
+	[data-output-save-indicator][data-state='saved'] {
+		color: color-mix(in srgb, var(--brand-optimizer), #1c2a2f 30%);
+	}
+
+	[data-output-save-indicator][data-state='error'] {
+		color: color-mix(in srgb, var(--brand-cv), #5a0d1f 30%);
+	}
+
 	[data-output-preview] {
 		--cv-primary: #0f766e;
 		--cv-ink: #1a2a2f;
@@ -240,499 +271,14 @@ const safeEntryId = typeof id === 'string' ? id : '';
 		border: 0;
 		border-top: 1px solid color-mix(in srgb, var(--cv-primary), white 70%);
 	}
+
+	[data-cv-undo]:disabled,
+	[data-cv-redo]:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
 </style>
 
 <script>
-	import DOMPurify from 'dompurify';
-
-	const HISTORY_DB_NAME = 'cv-optimizer-browser-memory';
-	const HISTORY_STORE_NAME = 'cv-history';
-	const PREVIEW_SELECTOR = '[data-output-preview]';
-	const DEFAULT_PRIMARY_COLOR = '#0f766e';
-
-	type StatusTone = 'proceso' | 'exito' | 'error';
-
-	interface HistoryEntry {
-		id: string;
-		createdAt: number;
-		sourceFileName: string;
-		safeFileName: string;
-		format: string;
-		inputSizeInBytes: number;
-		inputFile?: File;
-		summary: string;
-		contentHash: string;
-		optimizedHTML: string;
-		primaryColor: string;
-	}
-
-	const CV_SANITIZE_CONFIG = {
-		ALLOWED_TAGS: [
-			'h1',
-			'h2',
-			'h3',
-			'h4',
-			'h5',
-			'h6',
-			'p',
-			'div',
-			'span',
-			'section',
-			'article',
-			'strong',
-			'em',
-			'b',
-			'i',
-			'u',
-			'ul',
-			'ol',
-			'li',
-			'br',
-			'hr',
-			'a',
-			'table',
-			'thead',
-			'tbody',
-			'tr',
-			'th',
-			'td'
-		],
-		ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class'],
-		ALLOW_DATA_ATTR: false,
-		ALLOW_UNKNOWN_PROTOCOLS: false,
-		ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i
-	};
-
-	const root = document.querySelector('[data-output-root]');
-	const statusContainer = document.querySelector('[data-output-status]');
-	const statusTitle = document.querySelector('[data-output-status-title]');
-	const statusMessage = document.querySelector('[data-output-status-message]');
-	const outputMeta = document.querySelector('[data-output-meta]');
-	const resultContainer = document.querySelector('[data-output-result]');
-	const resultPreview = document.querySelector('[data-output-preview]');
-	const resultRaw = document.querySelector('[data-output-raw]');
-	const cvPrimaryColorPicker = document.querySelector('[data-cv-primary-color]');
-	const exportHtmlButton = document.querySelector('[data-cv-export-html]');
-	const exportTxtButton = document.querySelector('[data-cv-export-txt]');
-	const exportPdfButton = document.querySelector('[data-cv-export-pdf]');
-
-	if (
-		!(root instanceof HTMLElement) ||
-		!(statusContainer instanceof HTMLElement) ||
-		!(statusTitle instanceof HTMLElement) ||
-		!(statusMessage instanceof HTMLElement) ||
-		!(outputMeta instanceof HTMLElement) ||
-		!(resultContainer instanceof HTMLElement) ||
-		!(resultPreview instanceof HTMLElement) ||
-		!(resultRaw instanceof HTMLElement) ||
-		!(cvPrimaryColorPicker instanceof HTMLInputElement) ||
-		!(exportHtmlButton instanceof HTMLButtonElement) ||
-		!(exportTxtButton instanceof HTMLButtonElement) ||
-		!(exportPdfButton instanceof HTMLButtonElement)
-	) {
-		throw new Error('No se pudo inicializar la vista dedicada del CV optimizado.');
-	}
-
-	const entryId = root.dataset.entryId;
-	let currentDocumentBaseName = 'cv-optimizado';
-
-	const setStatus = (tone: StatusTone, title: string, message: string): void => {
-		statusContainer.hidden = false;
-		statusContainer.dataset.tone = tone;
-		statusTitle.textContent = title;
-		statusMessage.textContent = message;
-	};
-
-	const sanitizeCvHtml = (html: string): string => {
-		if (typeof html !== 'string' || html.length === 0) {
-			return '';
-		}
-		return DOMPurify.sanitize(html, CV_SANITIZE_CONFIG);
-	};
-
-	const isValidHexColor = (value: string): boolean => {
-		return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value);
-	};
-
-	const findPreviewRule = (rules: CSSRuleList): CSSStyleRule | null => {
-		for (const rule of Array.from(rules)) {
-			if (rule instanceof CSSStyleRule && rule.selectorText === PREVIEW_SELECTOR) {
-				return rule;
-			}
-
-			if (rule instanceof CSSGroupingRule) {
-				const nested = findPreviewRule(rule.cssRules);
-				if (nested) {
-					return nested;
-				}
-			}
-		}
-		return null;
-	};
-
-	let cachedPreviewRule: CSSStyleRule | null = null;
-
-	const getPreviewRule = (): CSSStyleRule | null => {
-		if (cachedPreviewRule instanceof CSSStyleRule) {
-			return cachedPreviewRule;
-		}
-
-		for (const styleSheet of Array.from(document.styleSheets)) {
-			try {
-				const foundRule = findPreviewRule(styleSheet.cssRules);
-				if (foundRule instanceof CSSStyleRule) {
-					cachedPreviewRule = foundRule;
-					return cachedPreviewRule;
-				}
-			} catch {
-				// Ignore non-readable cross-origin stylesheets.
-			}
-		}
-
-		return null;
-	};
-
-	const applyPreviewPrimaryColor = (color: string): void => {
-		const safeColor = isValidHexColor(color) ? color : DEFAULT_PRIMARY_COLOR;
-		const previewRule = getPreviewRule();
-		if (!(previewRule instanceof CSSStyleRule)) {
-			console.warn('No se pudo aplicar el color del preview: regla CSS no disponible.');
-			return;
-		}
-
-		previewRule.style.setProperty('--cv-primary', safeColor);
-	};
-
-	const syncRawHtmlPanel = () => {
-		resultRaw.textContent = resultPreview.innerHTML;
-	};
-
-	const toSafeFileName = (sourceName: string, extension: string): string => {
-		const normalizedName = sourceName
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.replace(/[^a-zA-Z0-9-_]+/g, '-')
-			.replace(/-{2,}/g, '-')
-			.replace(/^-|-$/g, '')
-			.toLowerCase();
-
-		return `${normalizedName || 'cv-optimizado'}.${extension}`;
-	};
-
-	const downloadTextFile = (fileName: string, content: string, mimeType: string): void => {
-		const blob = new Blob([content], { type: mimeType });
-		const objectUrl = URL.createObjectURL(blob);
-		const anchor = document.createElement('a');
-		anchor.href = objectUrl;
-		anchor.download = fileName;
-		document.body.appendChild(anchor);
-		anchor.click();
-		anchor.remove();
-		URL.revokeObjectURL(objectUrl);
-	};
-
-	const buildExportCss = (primaryColor: string): string => {
-		return `
-body {
-	margin: 0;
-	padding: 26px;
-	font-family: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
-	color: #1a2a2f;
-	background: #ffffff;
-}
-.cv-doc {
-	line-height: 1.55;
-	font-size: 15px;
-	color: #41545c;
-	--cv-primary: ${primaryColor};
-}
-.cv-doc h1 {
-	margin: 0;
-	font-size: 35px;
-	line-height: 1.15;
-	color: #1a2a2f;
-}
-.cv-doc h2 {
-	margin: 22px 0 9px;
-	padding-bottom: 5px;
-	border-bottom: 2px solid color-mix(in srgb, var(--cv-primary), white 65%);
-	font-size: 16px;
-	text-transform: uppercase;
-	color: var(--cv-primary);
-}
-.cv-doc h3 {
-	margin: 16px 0 5px;
-	font-size: 15px;
-	color: color-mix(in srgb, var(--cv-primary), #1a2a2f 52%);
-}
-.cv-doc p {
-	margin: 6px 0;
-}
-.cv-doc section {
-	margin-top: 12px;
-	padding-left: 12px;
-	border-left: 3px solid color-mix(in srgb, var(--cv-primary), white 76%);
-}
-.cv-doc ul,
-.cv-doc ol {
-	margin: 8px 0 11px;
-	padding-left: 17px;
-}
-.cv-doc li {
-	margin: 3px 0;
-}
-.cv-doc strong {
-	color: #1a2a2f;
-}
-.cv-doc .cv-placeholder {
-	display: inline-block;
-	margin: 0 2px;
-	padding: 2px 6px;
-	border-radius: 6px;
-	font-weight: 800;
-	letter-spacing: 0.01em;
-}
-.cv-doc .cv-placeholder-critical {
-	color: #9f1239;
-	background: #ffe4e6;
-	border: 1px solid #fb7185;
-}
-.cv-doc a {
-	color: color-mix(in srgb, var(--cv-primary), #0a3a35 18%);
-	font-weight: 700;
-	text-decoration: underline;
-}
-`;
-	};
-
-	const openHistoryDatabase = (): Promise<IDBDatabase> => {
-		return new Promise<IDBDatabase>((resolve, reject) => {
-			if (!('indexedDB' in window)) {
-				reject(new Error('IndexedDB no esta disponible en este navegador.'));
-				return;
-			}
-
-			const request = indexedDB.open(HISTORY_DB_NAME, 1);
-			request.onupgradeneeded = () => {
-				const database = request.result;
-				if (!database.objectStoreNames.contains(HISTORY_STORE_NAME)) {
-					database.createObjectStore(HISTORY_STORE_NAME, { keyPath: 'id' });
-				}
-			};
-			request.onsuccess = () => resolve(request.result);
-			request.onerror = () => reject(request.error ?? new Error('No se pudo abrir IndexedDB.'));
-		});
-	};
-
-	const readHistoryEntryById = async (historyId: string): Promise<HistoryEntry | null> => {
-		const database = await openHistoryDatabase();
-		return await new Promise<HistoryEntry | null>((resolve, reject) => {
-			const transaction = database.transaction(HISTORY_STORE_NAME, 'readonly');
-			const store = transaction.objectStore(HISTORY_STORE_NAME);
-			const request = store.get(historyId);
-
-			request.onsuccess = () => {
-				const result = request.result;
-				resolve(result && typeof result === 'object' ? (result as HistoryEntry) : null);
-			};
-			request.onerror = () => reject(request.error ?? new Error('No se pudo leer la version solicitada.'));
-
-			transaction.oncomplete = () => {
-				database.close();
-			};
-			transaction.onabort = () => {
-				database.close();
-			};
-			transaction.onerror = () => {
-				database.close();
-			};
-		});
-	};
-
-	const showResult = (optimizedHTML: string): void => {
-		const safeOptimizedHtml = sanitizeCvHtml(optimizedHTML);
-		if (!safeOptimizedHtml.trim()) {
-			throw new Error('El contenido optimizado no paso la sanitizacion del navegador.');
-		}
-
-		resultContainer.hidden = false;
-		resultPreview.innerHTML = safeOptimizedHtml;
-		applyPreviewPrimaryColor(cvPrimaryColorPicker.value);
-		syncRawHtmlPanel();
-	};
-
-	const loadEntry = async (): Promise<void> => {
-		if (typeof entryId !== 'string' || entryId.length === 0) {
-			setStatus('error', 'ID invalido', 'La URL no contiene un identificador de version valido.');
-			outputMeta.textContent = 'Version no encontrada.';
-			return;
-		}
-
-		setStatus('proceso', 'Cargando version', 'Recuperando contenido desde historial local.');
-
-		try {
-			const entry = await readHistoryEntryById(entryId);
-			if (!entry) {
-				setStatus(
-					'error',
-					'No se encontro la version',
-					'Esta version no existe en tu historial local o fue eliminada.'
-				);
-				outputMeta.textContent = 'Version no disponible.';
-				return;
-			}
-
-			if (typeof entry.optimizedHTML !== 'string' || entry.optimizedHTML.length === 0) {
-				setStatus(
-					'error',
-					'Contenido invalido',
-					'La version guardada no contiene HTML optimizado valido.'
-				);
-				outputMeta.textContent = 'Version invalida.';
-				return;
-			}
-
-			currentDocumentBaseName =
-				(entry.sourceFileName || entry.safeFileName || 'cv-optimizado').replace(/\.[^.]+$/, '');
-
-			const selectedColor =
-				typeof entry.primaryColor === 'string' && entry.primaryColor.length > 0
-					? entry.primaryColor
-					: DEFAULT_PRIMARY_COLOR;
-			cvPrimaryColorPicker.value = selectedColor;
-			showResult(entry.optimizedHTML);
-			applyPreviewPrimaryColor(selectedColor);
-
-			const sourceName = entry.sourceFileName || entry.safeFileName || 'CV sin nombre';
-			outputMeta.textContent = `Version: ${sourceName}`;
-			setStatus('exito', 'Version lista', 'Puedes editar el CV y exportarlo en el formato que prefieras.');
-		} catch (error) {
-			console.error('No se pudo cargar la version dedicada.', error);
-			setStatus('error', 'Error al cargar', 'No se pudo recuperar esta version local.');
-			outputMeta.textContent = 'Error de carga.';
-		}
-	};
-
-	resultPreview.addEventListener('input', syncRawHtmlPanel);
-
-	cvPrimaryColorPicker.addEventListener('input', (event) => {
-		const target = event.currentTarget;
-		if (!(target instanceof HTMLInputElement)) {
-			return;
-		}
-		applyPreviewPrimaryColor(target.value);
-	});
-
-	exportHtmlButton.addEventListener('click', () => {
-		if (!resultPreview.innerHTML.trim()) {
-			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
-			return;
-		}
-
-		const primaryColor = cvPrimaryColorPicker.value;
-		const safeEditorHtml = sanitizeCvHtml(resultPreview.innerHTML);
-		const cvMarkup = `<article class="cv-doc">${safeEditorHtml}</article>`;
-		const htmlDocument = `<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CV optimizado</title>
-  <style>${buildExportCss(primaryColor)}</style>
-</head>
-<body>
-${cvMarkup}
-</body>
-</html>`;
-
-		const fileName = toSafeFileName(currentDocumentBaseName, 'html');
-		downloadTextFile(fileName, htmlDocument, 'text/html;charset=utf-8');
-	});
-
-	exportTxtButton.addEventListener('click', () => {
-		const plainText = resultPreview.innerText.trim();
-		if (!plainText) {
-			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
-			return;
-		}
-
-		const fileName = toSafeFileName(currentDocumentBaseName, 'txt');
-		downloadTextFile(fileName, plainText, 'text/plain;charset=utf-8');
-	});
-
-	exportPdfButton.addEventListener('click', () => {
-		if (!resultPreview.innerHTML.trim()) {
-			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
-			return;
-		}
-
-		const primaryColor = cvPrimaryColorPicker.value;
-		const safeEditorHtml = sanitizeCvHtml(resultPreview.innerHTML);
-		const printableHtml = `<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CV optimizado</title>
-  <style>${buildExportCss(primaryColor)}</style>
-</head>
-<body>
-  <article class="cv-doc">${safeEditorHtml}</article>
-</body>
-</html>`;
-		const printableBlob = new Blob([printableHtml], { type: 'text/html;charset=utf-8' });
-		const printableUrl = URL.createObjectURL(printableBlob);
-
-		const printWindow = window.open(printableUrl, '_blank');
-		if (!printWindow) {
-			URL.revokeObjectURL(printableUrl);
-			setStatus(
-				'error',
-				'No se pudo abrir la vista de impresion',
-				'Tu navegador bloqueó la ventana emergente. Habilita pop-ups e intenta nuevamente.'
-			);
-			return;
-		}
-
-		setStatus(
-			'proceso',
-			'PDF listo para imprimir',
-			'Se abrió una pestaña de impresión. Si no aparece el diálogo automático, usa Cmd/Ctrl+P para guardar como PDF.'
-		);
-
-		const releasePrintableUrl = () => {
-			URL.revokeObjectURL(printableUrl);
-		};
-
-		const triggerNativePrint = () => {
-			printWindow.focus();
-			try {
-				printWindow.print();
-			} catch (printError) {
-				console.warn('No se pudo lanzar impresion automatica. Usa Cmd/Ctrl+P manualmente.', printError);
-			}
-		};
-
-		printWindow.addEventListener(
-			'load',
-			() => {
-				triggerNativePrint();
-			},
-			{ once: true }
-		);
-		printWindow.addEventListener(
-			'afterprint',
-			() => {
-				releasePrintableUrl();
-				printWindow.close();
-			},
-			{ once: true }
-		);
-
-		setTimeout(() => {
-			releasePrintableUrl();
-		}, 120000);
-	});
-
-	loadEntry();
+	import '../../server/browser-memory/optimizer-edition-view.client';
 </script>
