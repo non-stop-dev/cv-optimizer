@@ -7,13 +7,8 @@ import { buildGenerationConfig, resolveGeminiRuntimeConfig } from './gemini-conf
 import { GeminiConfigurationError, GeminiRequestError } from './gemini-errors';
 import { optimizeCvWithGemini } from './gemini-optimize-cv';
 import { GEMINI_CV_OPTIMIZER_SYSTEM_PROMPT } from './gemini-system-prompt';
+import { translateCvToEnglishWithGemini } from './gemini-translate-cv';
 import type { SupportedDocumentFormat, TargetPositions } from './upload/types';
-
-interface OptimizeCvSourceDocument {
-	file: File;
-	mimeType: string;
-	format: SupportedDocumentFormat;
-}
 
 type CodingEnvironment = 'development' | 'production';
 
@@ -21,11 +16,18 @@ interface GeminiRuntimeMetadata {
 	codingEnvironment: string;
 	processingModel: string;
 	generationModel: string;
+	translationModel: string;
 	maxOutputTokens: number;
 	temperature: number;
 	topP: number;
 	thinkingLevel: string;
 	googleSearchToolEnabled: boolean;
+}
+
+interface OptimizeCvSourceDocument {
+	file: File;
+	mimeType: string;
+	format: SupportedDocumentFormat;
 }
 
 /**
@@ -36,6 +38,7 @@ class GeminiService {
 	private ai: GoogleGenAI | null;
 	private processingModelName: string;
 	private generationModelName: string;
+	private translationModelName: string;
 	private codingEnvironment: CodingEnvironment;
 	private generationConfig: GenerateContentConfig;
 	private runtimeMetadata: GeminiRuntimeMetadata;
@@ -45,11 +48,13 @@ class GeminiService {
 		this.codingEnvironment = runtimeConfig.codingEnvironment;
 		this.processingModelName = runtimeConfig.processingModelName;
 		this.generationModelName = runtimeConfig.generationModelName;
+		this.translationModelName = runtimeConfig.translationModelName;
 		this.generationConfig = buildGenerationConfig(runtimeConfig);
 		this.runtimeMetadata = {
 			codingEnvironment: runtimeConfig.codingEnvironment,
 			processingModel: runtimeConfig.processingModelName,
 			generationModel: runtimeConfig.generationModelName,
+			translationModel: runtimeConfig.translationModelName,
 			maxOutputTokens: runtimeConfig.maxOutputTokens,
 			temperature: runtimeConfig.temperature,
 			topP: runtimeConfig.topP,
@@ -102,7 +107,8 @@ class GeminiService {
 	public getConfiguredModels() {
 		return {
 			processingModel: this.processingModelName,
-			generationModel: this.generationModelName
+			generationModel: this.generationModelName,
+			translationModel: this.translationModelName
 		};
 	}
 
@@ -125,6 +131,25 @@ class GeminiService {
 				content,
 				targetPositions,
 				sourceDocument,
+				logDevelopment: this.logDevelopment.bind(this),
+				runtimeMetadata: this.runtimeMetadata
+			});
+		} catch (error) {
+			if (error instanceof GeminiConfigurationError || error instanceof GeminiRequestError) {
+				throw error;
+			}
+			return mapGeminiUnknownError(error);
+		}
+	}
+
+	public async translateCvToEnglish(optimizedHtml: string): Promise<string> {
+		const client = this.getClient();
+		try {
+			return await translateCvToEnglishWithGemini({
+				client,
+				translationModelName: this.translationModelName,
+				generationConfig: this.generationConfig,
+				htmlContent: optimizedHtml,
 				logDevelopment: this.logDevelopment.bind(this),
 				runtimeMetadata: this.runtimeMetadata
 			});

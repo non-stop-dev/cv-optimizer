@@ -1,6 +1,9 @@
+import type { CvTemplateId } from '../export-cv/cv-export';
+
 export interface EditorSnapshot {
 	optimizedHTML: string;
 	primaryColor: string;
+	templateId: CvTemplateId;
 	timestamp: number;
 }
 
@@ -19,7 +22,11 @@ interface UndoRedoOptions {
 }
 
 const sameSnapshot = (left: EditorSnapshot, right: EditorSnapshot): boolean => {
-	return left.optimizedHTML === right.optimizedHTML && left.primaryColor === right.primaryColor;
+	return (
+		left.optimizedHTML === right.optimizedHTML &&
+		left.primaryColor === right.primaryColor &&
+		left.templateId === right.templateId
+	);
 };
 
 const keepWithinWindow = (
@@ -35,6 +42,7 @@ const cloneSnapshot = (snapshot: EditorSnapshot): EditorSnapshot => {
 	return {
 		optimizedHTML: snapshot.optimizedHTML,
 		primaryColor: snapshot.primaryColor,
+		templateId: snapshot.templateId,
 		timestamp: snapshot.timestamp
 	};
 };

@@ -1,4 +1,5 @@
 import {
+	DEFAULT_CV_TEMPLATE_ID,
 	buildHtmlExportDocument,
 	buildPrintableHtml,
 	downloadTextFile,
@@ -38,6 +39,7 @@ interface SaveHistoryPayload {
 	contentHash: string;
 	optimizedHTML: string;
 	primaryColor: string;
+	templateId: typeof DEFAULT_CV_TEMPLATE_ID;
 	targetPositions: string[];
 }
 
@@ -383,6 +385,7 @@ const saveCurrentVersionToHistory = async ({
 	contentHash,
 	optimizedHTML,
 	primaryColor,
+	templateId,
 	targetPositions
 }: SaveHistoryPayload): Promise<string> => {
 	const safeOptimizedHtml = sanitizeCvHtml(optimizedHTML);
@@ -405,6 +408,7 @@ const saveCurrentVersionToHistory = async ({
 			contentHash,
 			optimizedHTML: safeOptimizedHtml,
 			primaryColor,
+			templateId,
 			targetPositions
 		},
 		HISTORY_MAX_ENTRIES
@@ -443,7 +447,11 @@ const exportCurrentHtml = (): void => {
 	}
 
 	const fileName = toSafeFileName(currentDocumentBaseName, 'html');
-	const htmlDocument = buildHtmlExportDocument(resultPreview.innerHTML, cvPrimaryColorPicker.value);
+	const htmlDocument = buildHtmlExportDocument(
+		resultPreview.innerHTML,
+		cvPrimaryColorPicker.value,
+		DEFAULT_CV_TEMPLATE_ID
+	);
 	downloadTextFile(fileName, htmlDocument, 'text/html;charset=utf-8');
 };
 
@@ -464,7 +472,11 @@ const exportCurrentPdf = (): void => {
 		return;
 	}
 
-	const printableHtml = buildPrintableHtml(resultPreview.innerHTML, cvPrimaryColorPicker.value);
+	const printableHtml = buildPrintableHtml(
+		resultPreview.innerHTML,
+		cvPrimaryColorPicker.value,
+		DEFAULT_CV_TEMPLATE_ID
+	);
 	const opened = openPrintPreview(printableHtml);
 	if (!opened) {
 		setStatus(
@@ -565,6 +577,7 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 				contentHash: typeof payload?.data?.contentHash === 'string' ? payload.data.contentHash : '',
 				optimizedHTML,
 				primaryColor: cvPrimaryColorPicker.value,
+				templateId: DEFAULT_CV_TEMPLATE_ID,
 				targetPositions: normalizedTargetPositions
 			});
 		} catch (historyError) {

@@ -8,7 +8,7 @@
 				Sube tu CV
 			</label>
 			<p class="text-sm text-(--ink-soft)">
-				Formatos permitidos: PDF, HTML, YAML, YML y TXT. Tamano maximo: 10 MB.
+				Formatos permitidos: PDF, HTML, YAML, YML y TXT. Tamaño máximo: 10 MB.
 			</p>
 		</div>
 
@@ -40,14 +40,14 @@
 			class="mx-auto flex w-full max-w-2xl flex-col gap-2 rounded-xl border border-(--line) bg-white/84 p-4 text-left"
 		>
 			<label for="target-position-input" class="text-sm font-semibold text-(--ink-strong)">
-				Posicion objetivo (opcional)
+				Posición objetivo (opcional)
 			</label>
 			<p class="text-xs leading-relaxed text-(--ink-soft)">
-				Escribe una o varias posiciones separadas por comas. Ejemplo: Analista de datos, Cientifico de
+				Escribe una o varias posiciones separadas por comas. Ejemplo: Analista de datos, Científico de
 				datos.
 			</p>
 			<p class="text-xs leading-relaxed text-(--ink-soft)">
-				Mientras mas especifica y menos variable sea tu seleccion, mejores resultados obtendras. Evita
+				Mientras más específica y menos variable sea tu selección, mejores resultados obtendrás. Evita
 				combinar rubros que no se pueden compatibilizar (por ejemplo: Analista de datos y Cocinero).
 			</p>
 
@@ -165,7 +165,7 @@
 					role="tooltip"
 					class="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-lg border border-(--line) bg-white px-3 py-2 text-[11px] normal-case font-medium tracking-normal leading-relaxed text-(--ink-soft) opacity-0 shadow-[0_12px_24px_rgba(12,22,26,0.12)] transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
 				>
-					La exportacion PDF se realiza mediante la vista de impresion del navegador. Si no se abre automaticamente,
+					La exportación PDF se realiza mediante la vista de impresión del navegador. Si no se abre automáticamente,
 					usa Cmd/Ctrl+P y guarda como PDF.
 				</span>
 			</button>
@@ -205,7 +205,7 @@
 			</button>
 		</div>
 		<p data-upload-history-empty class="mt-3 text-sm text-(--ink-soft)">
-			Aun no hay versiones guardadas.
+			Aún no hay versiones guardadas.
 		</p>
 		<ul data-upload-history-list class="mt-3 space-y-2"></ul>
 	</section>
@@ -383,6 +383,14 @@
 	[data-upload-result-preview] ol {
 		margin: 0.45rem 0 0.75rem;
 		padding-left: 1.1rem;
+	}
+
+	[data-upload-result-preview] ul {
+		list-style: disc;
+	}
+
+	[data-upload-result-preview] ol {
+		list-style: decimal;
 	}
 
 	[data-upload-result-preview] li {

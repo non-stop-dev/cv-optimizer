@@ -1,3 +1,5 @@
+import type { CvTemplateId } from '../export-cv/cv-export';
+
 export interface HistoryEntry {
 	id: string;
 	createdAt: number;
@@ -10,5 +12,6 @@ export interface HistoryEntry {
 	contentHash: string;
 	optimizedHTML: string;
 	primaryColor: string;
+	templateId: CvTemplateId;
 	targetPositions: string[];
 }

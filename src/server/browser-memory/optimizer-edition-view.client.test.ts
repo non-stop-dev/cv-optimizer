@@ -26,6 +26,13 @@ vi.mock('../export-cv/cv-preview-color', () => ({
 vi.mock('../export-cv/cv-export', () => ({
 	toSafeFileName: (sourceName: string, extension: string) => `${sourceName}.${extension}`,
 	downloadTextFile: mocks.downloadTextFile,
+	toCvTemplateId: (value: string | null | undefined) => {
+		if (value === 'executive' || value === 'minimal' || value === 'serif' || value === 'default') {
+			return value;
+		}
+
+		return 'default';
+	},
 	buildHtmlExportDocument: () => '<html></html>',
 	buildPrintableHtml: () => '<html></html>',
 	openPrintPreview: () => true
@@ -44,11 +51,30 @@ const buildEditionDom = (): void => {
 			</div>
 			<section data-output-result hidden>
 				<input data-cv-primary-color value="#0f766e" />
+				<select data-cv-template-select>
+					<option value="default">Default</option>
+					<option value="executive">Executive</option>
+					<option value="minimal">Minimal</option>
+					<option value="serif">Serif</option>
+				</select>
 				<button data-cv-undo type="button"></button>
 				<button data-cv-redo type="button"></button>
-				<button data-cv-export-html type="button"></button>
-				<button data-cv-export-txt type="button"></button>
-				<button data-cv-export-pdf type="button"></button>
+				<button data-cv-translate-en type="button">
+					<span data-cv-translate-en-label>Traducir al inglés</span>
+					<span data-cv-translate-source-tooltip></span>
+				</button>
+				<button data-cv-format-bold type="button"></button>
+				<button data-cv-format-italic type="button"></button>
+				<button data-cv-format-underline type="button"></button>
+				<button data-cv-format-link type="button"></button>
+				<div data-cv-export-shell>
+					<button data-cv-export-trigger type="button"></button>
+					<div data-cv-export-list hidden>
+						<button data-cv-export-option="html" type="button"></button>
+						<button data-cv-export-option="txt" type="button"></button>
+						<button data-cv-export-option="pdf" type="button"></button>
+					</div>
+				</div>
 				<div data-output-preview contenteditable="true"></div>
 				<pre data-output-raw></pre>
 			</section>
@@ -82,6 +108,7 @@ beforeEach(() => {
 		contentHash: 'hash',
 		optimizedHTML: '<p>Original</p>',
 		primaryColor: '#0f766e',
+		templateId: 'default',
 		targetPositions: ['Analista de datos']
 	});
 	mocks.upsertHistoryEntry.mockResolvedValue(undefined);
@@ -127,6 +154,7 @@ describe('optimizer-edition-view client flow', () => {
 			expect.objectContaining({
 				optimizedHTML: '<p>Editado</p>',
 				primaryColor: '#0f766e',
+				templateId: 'default',
 				targetPositions: ['Analista de datos']
 			})
 		);
@@ -171,6 +199,48 @@ describe('optimizer-edition-view client flow', () => {
 
 		expect(mocks.upsertHistoryEntry).toHaveBeenCalledWith(
 			expect.objectContaining({ optimizedHTML: '<p>Cambio pendiente</p>' })
+		);
+	});
+
+	it('guarda la plantilla seleccionada y la aplica al preview', async () => {
+		await loadClientModule();
+
+		const templateSelect = document.querySelector('[data-cv-template-select]') as HTMLSelectElement;
+		const preview = document.querySelector('[data-output-preview]') as HTMLElement;
+
+		templateSelect.value = 'serif';
+		templateSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(preview.dataset.cvTemplate).toBe('serif');
+
+		vi.advanceTimersByTime(220);
+		await flushAsync();
+		vi.advanceTimersByTime(500);
+		await flushAsync();
+
+		expect(mocks.upsertHistoryEntry).toHaveBeenCalledWith(
+			expect.objectContaining({ templateId: 'serif' })
+		);
+	});
+
+	it('exporta desde el menu compacto de formatos', async () => {
+		await loadClientModule();
+
+		const exportTrigger = document.querySelector('[data-cv-export-trigger]') as HTMLButtonElement;
+		const exportList = document.querySelector('[data-cv-export-list]') as HTMLElement;
+		const htmlOption = document.querySelector('[data-cv-export-option="html"]') as HTMLButtonElement;
+
+		expect(exportList.hidden).toBe(true);
+
+		exportTrigger.click();
+		expect(exportList.hidden).toBe(false);
+
+		htmlOption.click();
+		expect(exportList.hidden).toBe(true);
+		expect(mocks.downloadTextFile).toHaveBeenCalledWith(
+			'cv-test.html',
+			'<html></html>',
+			'text/html;charset=utf-8'
 		);
 	});
 });

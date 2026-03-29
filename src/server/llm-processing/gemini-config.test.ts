@@ -10,6 +10,7 @@ import {
 
 const ORIGINAL_CODING_ENVIRONMENT = process.env.CODING_ENVIRONMENT;
 const ORIGINAL_AI_SAFETY_MODE = process.env.AI_SAFETY_MODE;
+const ORIGINAL_AI_MODEL_FOR_DOCUMENT_TRANSLATION = process.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION;
 
 const restoreEnvironment = (): void => {
 	if (ORIGINAL_CODING_ENVIRONMENT === undefined) {
@@ -23,6 +24,12 @@ const restoreEnvironment = (): void => {
 	} else {
 		process.env.AI_SAFETY_MODE = ORIGINAL_AI_SAFETY_MODE;
 	}
+
+	if (ORIGINAL_AI_MODEL_FOR_DOCUMENT_TRANSLATION === undefined) {
+		delete process.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION;
+	} else {
+		process.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION = ORIGINAL_AI_MODEL_FOR_DOCUMENT_TRANSLATION;
+	}
 };
 
 afterEach(() => {
@@ -34,6 +41,7 @@ const createRuntimeConfig = (safetyMode: GeminiSafetyMode): GeminiRuntimeConfig 
 		codingEnvironment: 'production',
 		processingModelName: 'processing-model',
 		generationModelName: 'generation-model',
+		translationModelName: 'translation-model',
 		maxOutputTokens: 4096,
 		temperature: 1,
 		topP: 0.95,
@@ -68,10 +76,12 @@ describe('resolveGeminiRuntimeConfig safety mode defaults', () => {
 	it('permite override explicito con AI_SAFETY_MODE', () => {
 		process.env.CODING_ENVIRONMENT = 'production';
 		process.env.AI_SAFETY_MODE = 'off';
+		process.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION = 'gemini-translation-custom';
 
 		const config = resolveGeminiRuntimeConfig();
 
 		expect(config.safetyMode).toBe('off');
+		expect(config.translationModelName).toBe('gemini-translation-custom');
 	});
 });
 

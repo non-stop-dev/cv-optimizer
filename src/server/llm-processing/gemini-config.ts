@@ -12,6 +12,7 @@ export interface GeminiRuntimeConfig {
 	codingEnvironment: CodingEnvironment;
 	processingModelName: string;
 	generationModelName: string;
+	translationModelName: string;
 	maxOutputTokens: number;
 	temperature: number;
 	topP: number;
@@ -23,6 +24,7 @@ export interface GeminiRuntimeConfig {
 
 const DEFAULT_PROCESSING_MODEL = 'gemini-3.1-flash-lite-preview';
 const DEFAULT_GENERATION_MODEL = 'gemini-3-flash-preview';
+const DEFAULT_TRANSLATION_MODEL = 'gemini-3.1-flash-lite-preview';
 const DEFAULT_MAX_OUTPUT_TOKENS = 10000;
 const DEFAULT_TEMPERATURE = 1;
 const DEFAULT_TOP_P = 0.95;
@@ -173,6 +175,10 @@ export const resolveGeminiRuntimeConfig = (): GeminiRuntimeConfig => {
 			import.meta.env.AI_MODEL_FOR_DOCUMENT_GENERATION?.trim() ||
 			process.env.AI_MODEL_FOR_DOCUMENT_GENERATION?.trim() ||
 			DEFAULT_GENERATION_MODEL,
+		translationModelName:
+			import.meta.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION?.trim() ||
+			process.env.AI_MODEL_FOR_DOCUMENT_TRANSLATION?.trim() ||
+			DEFAULT_TRANSLATION_MODEL,
 		maxOutputTokens: resolveNumberEnvironmentValue(
 			'AI_MAX_OUTPUT_TOKENS',
 			import.meta.env.AI_MAX_OUTPUT_TOKENS?.trim() || process.env.AI_MAX_OUTPUT_TOKENS?.trim(),

@@ -1,9 +1,21 @@
+---
+interface Props {
+	cardless?: boolean;
+}
+
+const { cardless = false } = Astro.props as Props;
+
+const containerClass = cardless
+	? 'p-6 md:p-8'
+	: 'glass-card rounded-[1.8rem] border border-(--line) p-6 md:p-8';
+---
+
 <section class="mx-auto mt-6 w-full max-w-5xl px-6 md:px-10" aria-labelledby="important-info-title">
-	<div class="glass-card rounded-[1.8rem] border border-(--line) p-6 md:p-8">
+	<div class={containerClass}>
 		<div class="space-y-2">
-			<h2 id="important-info-title" class="text-2xl font-extrabold md:text-3xl">Informacion importante</h2>
+			<h2 id="important-info-title" class="text-2xl font-extrabold md:text-3xl">Información importante</h2>
 			<p class="max-w-3xl text-sm leading-relaxed text-(--ink-soft) md:text-base">
-				Antes de continuar, revisa estos puntos para proteger tu informacion y usar la plataforma con seguridad.
+				Antes de continuar, revisa estos puntos para proteger tu información y usar la plataforma con seguridad.
 			</p>
 		</div>
 
@@ -13,16 +25,16 @@
 					Tus datos se guardan de forma local
 				</summary>
 				<p class="mt-3 text-sm leading-relaxed text-(--ink-soft) md:text-base">
-					Tu CV y los cambios que hagas se guardan localmente. Si cambias de dispositivo, deberas empezar de cero.
+					Tu CV y los cambios que hagas se guardan localmente. Si cambias de dispositivo, deberás empezar de cero.
 				</p>
 			</details>
 
 			<details class="rounded-xl border border-(--line) bg-white/70 p-4">
 				<summary class="cursor-pointer text-base font-bold text-(--ink-strong)">
-					Recomendacion para no perder trabajo
+					Recomendación para no perder trabajo
 				</summary>
 				<p class="mt-3 text-sm leading-relaxed text-(--ink-soft) md:text-base">
-					Descarga tu CV cada vez que completes una version importante. Asi mantendras una copia lista para enviar a cualquier proceso.
+					Descarga tu CV cada vez que completes una versión importante. Así mantendrás una copia lista para enviar a cualquier proceso.
 				</p>
 			</details>
 		</div>
