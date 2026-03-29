@@ -1,14 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import NavBar from '../components/nav-bar/NavBar.astro';
-import HeroSection from '../components/hero/HeroSection.astro';
+import LandingHero from '../components/landing/hero/LandingHero.astro';
+import ProblemSection from '../components/landing/problem/ProblemSection.astro';
+import WorkflowSection from '../components/landing/workflow/WorkflowSection.astro';
 import ImportantInformation from '../components/disclosures/ImportantInformation.astro';
 ---
 
 <Layout>
-	<main class="relative min-h-screen pb-16">
+	<main class="relative min-h-screen pb-16 bg-white">
 		<NavBar />
-		<HeroSection />
+		<LandingHero />
+		<ProblemSection />
+		<WorkflowSection />
 		<ImportantInformation />
 	</main>
 </Layout>
