@@ -67,3 +67,9 @@ The `src/server/` directory is organized by feature and domain:
 * **Component Logic:** When creating the editor, implement a "change tracker" that syncs with `src/server/browser-memory`.
 * **Style Logic:** Ensure that switching a template in `src/styles/cv-templates` does not reset the edited content in the state.
 * **Export Logic:** The `.txt` export must be strictly plain text, optimized for ATS parsers (no markdown symbols like `**` or `#`).
+
+## 6. Mandatory Script Modularization Rule
+* **Hard Limit:** Ningun script, source file o test puede superar **500 LOC**.
+* **Mandatory Refactor Trigger:** Si cualquier script supera 500 LOC, pasa a ser **candidato obligatorio de modularizacion** antes de continuar el feature.
+* **Naming Rule:** Toda extraccion debe usar naming de **Screaming Architecture** orientado al dominio o workflow real (por ejemplo: `llm-document-upload`, `llm-model-selector`, `document-upload-history`, `optimizer-edition-export-workflow`).
+* **No Generic Splits:** Queda prohibido modularizar con nombres genericos como `utils`, `helpers`, `misc`, `part2` o equivalentes que oculten responsabilidad.
