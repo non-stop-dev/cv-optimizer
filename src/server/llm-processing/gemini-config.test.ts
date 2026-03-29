@@ -6,7 +6,7 @@ import {
 	resolveGeminiRuntimeConfig,
 	type GeminiRuntimeConfig,
 	type GeminiSafetyMode
-} from './gemini-config';
+} from './gemini-config'; 
 
 const ORIGINAL_CODING_ENVIRONMENT = process.env.CODING_ENVIRONMENT;
 const ORIGINAL_AI_SAFETY_MODE = process.env.AI_SAFETY_MODE;
