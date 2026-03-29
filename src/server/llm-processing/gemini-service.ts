@@ -54,16 +54,21 @@ class GeminiService {
 	 */
 	public async optimizeCV(content: string) {
 		const prompt = `
-            Eres un experto en reclutamiento IT y optimización de CVs para el mercado de Perú.
-            Tu objetivo es transformar el siguiente contenido en un CV optimizado para ATS y reclutadores humanos.
+            You are an expert IT Recruiter and CV Optimization specialist. Your goal is to transform the following content into a CV optimized for both ATS (Applicant Tracking Systems) and human recruiters, making it attractive for AI-based recruitment algorithms and easily scannable for the human eye.
 
-            REGLAS DE ORO:
-            1. Mantén la estructura profesional y elegante.
-            2. Usa métricas de impacto (Ej: "Aumenté la eficiencia en 20%" en lugar de "Hice tareas").
-            3. Devuelve el contenido en formato HTML Semántico puro (sin CSS inline).
-            4. No uses lenguaje innecesariamente complejo, manténlo directo y profesional.
+            GOLDEN RULES:
+            1. Maintain a professional and elegant structure. It must sound natural, avoiding "AI-written" patterns, redundancies, or empty verbosity. Every sentence must add concrete value.
+            2. Use impact metrics ONLY if they are available in the base curriculum; NEVER invent data. (e.g., "Increased efficiency by 20%" instead of "Improved efficiency" or "Did X thing").
+            3. Return the content in pure Semantic HTML format (NO inline CSS, NO style tags). Use tags like <header>, <section>, <h1>, <h2>, <h3>, <ul>, <li>, <p>, etc.
+            4. Do not use unnecessarily complex language; keep it direct, impactful, and professional.
+            5. Include clear semantic headers for: "Work Experience", "Education", "Skills", "Projects", and "Summary/Profile".
+            6. Start bullet points with strong action verbs: Led, Developed, Achieved, Spearheaded, Optimized.
+            7. Embed industry-specific keywords relevant to the candidate's target role naturally within the text rather than just listing them in a separate section.
+            8. Aim for a length equivalent to 1-2 pages (approx. 400-800 words).
+            9. Use clear bullet points to list achievements and specific responsibilities.
+            10. Output language: same as the input content.
 
-            CONTENIDO ORIGINAL:
+            ORIGINAL CONTENT:
             ${content}
         `;
 
