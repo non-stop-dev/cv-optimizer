@@ -1,7 +1,7 @@
 # PROJECT_SPEC: CV Optimizer (Professional Edition)
 
 ## 1. Vision & Architecture
-This project follows a **Screaming Architecture** pattern. The folder structure itself communicates the application's domain and intent rather than just the framework's technical layers. Selected framework is Astro
+This project follows a **Screaming Architecture** pattern. The folder structure itself communicates the application's domain and intent rather than just the framework's technical layers. Selected frameworks are Astro and Tailwind CSS v4
 
 ### Core Architectural Principle: Content/Style Decoupling
 The AI **must never** generate CSS. Its sole responsibility is generating **Semantic HTML** (Content). The application then injects pre-defined, hardcoded CSS (Styles) based on user selection.

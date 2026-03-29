@@ -12,6 +12,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.1.1"
+    "@astrojs/node": "^10.0.4",
+    "@tailwindcss/vite": "^4.2.2",
+    "astro": "^6.1.1",
+    "pdfjs-dist": "^5.5.207",
+    "sanitize-html": "^2.17.2",
+    "tailwindcss": "^4.2.2",
+    "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@types/node": "^25.5.0",
+    "@types/sanitize-html": "^2.16.1",
+    "typescript": "^5.9.3"
   }
 }
