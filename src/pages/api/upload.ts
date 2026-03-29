@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 
 import { UploadSanitizationError } from '../../server/llm-processing/upload/errors';
 import { sanitizeUploadedDocument } from '../../server/llm-processing/upload/sanitizeUploadedDocument';
+import { gemini } from '../../server/llm-processing/gemini-service';
 
 export const prerender = false;
 
@@ -62,15 +63,20 @@ export const POST: APIRoute = async ({ request }) => {
 
 	try {
 		const sanitizedDocument = await sanitizeUploadedDocument(candidate);
+
+		// Dispara el flujo de optimización con Gemini
+		const optimizedHTML = await gemini.optimizeCV(sanitizedDocument.sanitizedContent);
+
 		return toJsonResponse({
 			ok: true,
-			message: 'Documento validado y sanitizado correctamente.',
+			message: 'Documento procesado y optimizado con éxito.',
 			data: {
 				format: sanitizedDocument.format,
 				safeFileName: sanitizedDocument.safeFileName,
 				sizeInBytes: sanitizedDocument.sizeInBytes,
 				summary: sanitizedDocument.summary,
-				contentHash: sanitizedDocument.contentHash
+				contentHash: sanitizedDocument.contentHash,
+				optimizedHTML // Contenido enriquecido por la IA
 			}
 		});
 	} catch (error) {

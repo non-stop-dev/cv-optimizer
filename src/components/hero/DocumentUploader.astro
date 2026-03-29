@@ -1,8 +1,8 @@
-<section class="fade-up-delay space-y-4" aria-label="Carga de documento">
-	<form data-upload-form class="glass-card space-y-4 rounded-2xl border border-(--line) p-5 md:p-6">
+<section class="fade-up-delay flex flex-col items-center space-y-4 text-center" aria-label="Carga de documento">
+	<form data-upload-form class="glass-card w-full space-y-4 rounded-2xl border border-(--line) p-5 text-left md:p-6">
 		<div class="space-y-2">
 			<label for="cv-document" class="text-base font-semibold text-(--ink-strong)">
-				Sube tu CV para validarlo
+				Sube tu CV
 			</label>
 			<p class="text-sm text-(--ink-soft)">
 				Formatos permitidos: PDF, HTML, YAML, YML y TXT. Tamano maximo: 10 MB.
@@ -18,25 +18,25 @@
 			data-upload-input
 			class="block w-full cursor-pointer rounded-xl border border-(--line) bg-(--surface) px-4 py-3 text-sm font-medium text-(--ink-soft) file:mr-3 file:rounded-lg file:border-0 file:bg-(--brand-optimizer) file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:brightness-110"
 		/>
-
-		<button
-			type="submit"
-			data-upload-submit
-			class="inline-flex items-center justify-center rounded-xl bg-(--brand-cv) px-6 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-		>
-			Subir y validar documento
-		</button>
 	</form>
+
+	<button
+		type="submit"
+		data-upload-submit
+		class="inline-flex w-full items-center justify-center rounded-xl bg-(--brand-cv) px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:brightness-110 sm:w-auto md:px-12"
+	>
+		Subir
+	</button>
 
 	<aside
 		data-upload-status
 		hidden
-		class="rounded-2xl border border-(--line) bg-white/80 p-5 text-sm text-(--ink-strong)"
+		class="w-full rounded-2xl border border-(--line) bg-white/80 p-5 text-left text-sm text-(--ink-strong)"
 		aria-live="polite"
 	>
 		<h3 data-upload-status-title class="text-base font-bold"></h3>
 		<p data-upload-status-message class="mt-2 text-(--ink-soft)"></p>
-		<dl data-upload-status-details class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2"></dl>
+		<ul data-upload-log-list class="mt-4 space-y-2"></ul>
 	</aside>
 </section>
 
@@ -55,11 +55,57 @@
 		border-color: color-mix(in srgb, var(--brand-cv), white 20%);
 		background: color-mix(in srgb, var(--brand-cv), white 90%);
 	}
+
+	[data-upload-log-list] {
+		list-style: none;
+		padding: 0;
+	}
+
+	[data-upload-log-item] {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		border: 1px solid color-mix(in srgb, var(--line), white 18%);
+		border-radius: 0.7rem;
+		background: rgba(255, 255, 255, 0.76);
+		padding: 0.48rem 0.65rem;
+		font-size: 0.9rem;
+		color: var(--ink-soft);
+	}
+
+	[data-upload-log-item]::before {
+		content: '';
+		height: 0.52rem;
+		width: 0.52rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--brand-optimizer), white 28%);
+	}
+
+	[data-upload-log-item][data-state='en-progreso'] {
+		color: var(--ink-strong);
+		font-weight: 700;
+	}
+
+	[data-upload-log-item][data-state='completado']::before {
+		background: var(--brand-optimizer);
+	}
+
+	[data-upload-log-item][data-state='error']::before {
+		background: var(--brand-cv);
+	}
 </style>
 
 <script is:inline>
 	const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 	const ALLOWED_EXTENSIONS = new Set(['.pdf', '.html', '.yaml', '.yml', '.txt']);
+	const PROCESSING_STEPS = [
+		'Cargando documento',
+		'Validando sintaxis',
+		'Examinando posiciones',
+		'Reescribiendo CV',
+		'Optimizando estrategicamente',
+		'Finalizando'
+	];
 
 	const form = document.querySelector('[data-upload-form]');
 	const input = document.querySelector('[data-upload-input]');
@@ -67,7 +113,7 @@
 	const statusContainer = document.querySelector('[data-upload-status]');
 	const statusTitle = document.querySelector('[data-upload-status-title]');
 	const statusMessage = document.querySelector('[data-upload-status-message]');
-	const statusDetails = document.querySelector('[data-upload-status-details]');
+	const statusLogList = document.querySelector('[data-upload-log-list]');
 
 	if (
 		!(form instanceof HTMLFormElement) ||
@@ -76,32 +122,48 @@
 		!(statusContainer instanceof HTMLElement) ||
 		!(statusTitle instanceof HTMLElement) ||
 		!(statusMessage instanceof HTMLElement) ||
-		!(statusDetails instanceof HTMLElement)
+		!(statusLogList instanceof HTMLElement)
 	) {
 		throw new Error('No se pudo inicializar el componente de carga de documentos.');
 	}
 
-	const setStatus = (tone, title, message, details = []) => {
+	const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+	const setStatus = (tone, title, message) => {
 		statusContainer.hidden = false;
 		statusContainer.dataset.tone = tone;
 		statusTitle.textContent = title;
 		statusMessage.textContent = message;
-		statusDetails.innerHTML = '';
+	};
 
-		for (const detail of details) {
-			const row = document.createElement('div');
-			row.className = 'rounded-lg border border-(--line) bg-white/70 px-3 py-2';
+	const clearLogs = () => {
+		statusLogList.innerHTML = '';
+	};
 
-			const key = document.createElement('dt');
-			key.className = 'text-xs uppercase tracking-[0.06em] text-(--ink-soft)';
-			key.textContent = detail.key;
+	const appendLog = (text, state) => {
+		const item = document.createElement('li');
+		item.dataset.uploadLogItem = '';
+		item.dataset.state = state;
+		item.textContent = text;
+		statusLogList.appendChild(item);
+	};
 
-			const value = document.createElement('dd');
-			value.className = 'mt-1 text-sm font-semibold text-(--ink-strong)';
-			value.textContent = detail.value;
+	const markLatestLogAsComplete = () => {
+		const latestLog = statusLogList.lastElementChild;
+		if (!(latestLog instanceof HTMLElement)) {
+			return;
+		}
 
-			row.append(key, value);
-			statusDetails.appendChild(row);
+		latestLog.dataset.state = 'completado';
+	};
+
+	const runProcessingLogs = async () => {
+		clearLogs();
+
+		for (const step of PROCESSING_STEPS) {
+			appendLog(step, 'en-progreso');
+			await sleep(260);
+			markLatestLogAsComplete();
 		}
 	};
 
@@ -123,43 +185,47 @@
 		return null;
 	};
 
-	const setLoadingState = (isLoading) => {
-		submitButton.disabled = isLoading;
-		submitButton.textContent = isLoading ? 'Validando...' : 'Subir y validar documento';
+	const toFriendlyErrorMessage = (statusCode) => {
+		if (statusCode === 413) {
+			return 'El archivo excede el tamano permitido. Usa un documento de hasta 10 MB.';
+		}
+
+		if (statusCode === 415) {
+			return 'Ese formato no esta permitido. Sube PDF, HTML, YAML, YML o TXT.';
+		}
+
+		if (statusCode === 422) {
+			return 'No se pudo procesar este archivo. Prueba con otra exportacion del CV.';
+		}
+
+		return 'No pudimos procesar tu documento por ahora. Intenta nuevamente.';
 	};
 
-	input.addEventListener('change', () => {
-		const file = input.files?.[0];
-		if (!file) {
-			return;
-		}
-
-		const errorMessage = validateFileSelection(file);
-		if (errorMessage) {
-			setStatus('error', 'Archivo rechazado', errorMessage);
-			return;
-		}
-
-		setStatus('proceso', 'Archivo listo', 'El archivo cumple validaciones iniciales. Ahora puedes subirlo.');
-	});
+	const setLoadingState = (isLoading) => {
+		submitButton.disabled = isLoading;
+		submitButton.textContent = isLoading ? 'Subiendo...' : 'Subir';
+	};
 
 	form.addEventListener('submit', async (event) => {
 		event.preventDefault();
 		const file = input.files?.[0];
 
 		if (!file) {
-			setStatus('error', 'Falta un archivo', 'Selecciona un documento antes de continuar.');
+			setStatus('error', 'No se pudo subir', 'Selecciona un documento e intenta nuevamente.');
+			clearLogs();
 			return;
 		}
 
 		const errorMessage = validateFileSelection(file);
 		if (errorMessage) {
-			setStatus('error', 'Archivo rechazado', errorMessage);
+			setStatus('error', 'No se pudo subir', 'Revisa el archivo e intenta nuevamente.');
+			clearLogs();
 			return;
 		}
 
 		setLoadingState(true);
-		setStatus('proceso', 'Procesando', 'Estamos validando y sanitizando tu documento.');
+		setStatus('proceso', 'Procesando CV', 'Estamos trabajando en tu documento.');
+		const processingLogPromise = runProcessingLogs();
 
 		try {
 			const body = new FormData();
@@ -170,27 +236,23 @@
 				body
 			});
 
-			const payload = await response.json();
+			const payload = await response.json().catch(() => null);
+			await processingLogPromise;
+
 			if (!response.ok || payload?.ok !== true) {
-				const message =
-					typeof payload?.error?.message === 'string'
-						? payload.error.message
-						: 'No se pudo sanitizar el documento.';
-				throw new Error(message);
+				throw new Error(toFriendlyErrorMessage(response.status));
 			}
 
-			setStatus('exito', 'Documento validado', payload.message, [
-				{ key: 'Formato', value: payload.data.format.toUpperCase() },
-				{ key: 'Archivo seguro', value: payload.data.safeFileName },
-				{ key: 'Tamano', value: `${Math.ceil(payload.data.sizeInBytes / 1024)} KB` },
-				{ key: 'Resumen', value: payload.data.summary }
-			]);
+			setStatus('exito', 'Documento subido', 'Tu CV se proceso correctamente y esta listo para optimizacion.');
+			appendLog('Proceso completado', 'completado');
 		} catch (error) {
+			await processingLogPromise;
 			const message =
 				error instanceof Error
 					? error.message
 					: 'Ocurrio un error inesperado al procesar el archivo.';
-			setStatus('error', 'Error de seguridad', message);
+			setStatus('error', 'No se pudo procesar', message);
+			appendLog('Proceso detenido', 'error');
 		} finally {
 			setLoadingState(false);
 		}
