@@ -6,6 +6,7 @@ import {
 } from '@google/genai';
 
 export type CodingEnvironment = 'development' | 'production';
+export type GeminiSafetyMode = 'strict' | 'relaxed' | 'off';
 
 export interface GeminiRuntimeConfig {
 	codingEnvironment: CodingEnvironment;
@@ -15,16 +16,19 @@ export interface GeminiRuntimeConfig {
 	temperature: number;
 	topP: number;
 	thinkingLevel: ThinkingLevel;
+	safetyMode: GeminiSafetyMode;
 	enableGoogleSearchTool: boolean;
 	apiKey: string | null;
 }
 
 const DEFAULT_PROCESSING_MODEL = 'gemini-3.1-flash-lite-preview';
 const DEFAULT_GENERATION_MODEL = 'gemini-3-flash-preview';
-const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
+const DEFAULT_MAX_OUTPUT_TOKENS = 10000;
 const DEFAULT_TEMPERATURE = 1;
 const DEFAULT_TOP_P = 0.95;
 const DEFAULT_THINKING_LEVEL = ThinkingLevel.LOW;
+const DEFAULT_PRODUCTION_SAFETY_MODE: GeminiSafetyMode = 'strict';
+const DEFAULT_DEVELOPMENT_SAFETY_MODE: GeminiSafetyMode = 'relaxed';
 const DEFAULT_ENABLE_GOOGLE_SEARCH_TOOL = false;
 
 const resolveNumberEnvironmentValue = (
@@ -94,6 +98,47 @@ const resolveThinkingLevel = (rawValue: string | undefined): ThinkingLevel => {
 	return DEFAULT_THINKING_LEVEL;
 };
 
+const resolveSafetyMode = (
+	rawValue: string | undefined,
+	codingEnvironment: CodingEnvironment
+): GeminiSafetyMode => {
+	const defaultSafetyMode =
+		codingEnvironment === 'production'
+			? DEFAULT_PRODUCTION_SAFETY_MODE
+			: DEFAULT_DEVELOPMENT_SAFETY_MODE;
+
+	if (!rawValue) {
+		return defaultSafetyMode;
+	}
+
+	const normalizedValue = rawValue.trim().toLowerCase();
+	if (normalizedValue === 'strict') {
+		return 'strict';
+	}
+	if (normalizedValue === 'relaxed') {
+		return 'relaxed';
+	}
+	if (normalizedValue === 'off') {
+		return 'off';
+	}
+
+	console.warn(
+		`⚠️ AI_SAFETY_MODE="${rawValue}" no es valido. Se usara "${defaultSafetyMode}" para ${codingEnvironment}.`
+	);
+	return defaultSafetyMode;
+};
+
+const resolveSafetyThreshold = (safetyMode: GeminiSafetyMode): HarmBlockThreshold => {
+	if (safetyMode === 'strict') {
+		return HarmBlockThreshold.BLOCK_LOW_AND_ABOVE;
+	}
+	if (safetyMode === 'relaxed') {
+		return HarmBlockThreshold.BLOCK_ONLY_HIGH;
+	}
+
+	return HarmBlockThreshold.OFF;
+};
+
 export const resolveCodingEnvironment = (): CodingEnvironment => {
 	const rawValue =
 		import.meta.env.CODING_ENVIRONMENT?.trim().toLowerCase() ||
@@ -109,6 +154,8 @@ export const resolveCodingEnvironment = (): CodingEnvironment => {
 };
 
 export const resolveGeminiRuntimeConfig = (): GeminiRuntimeConfig => {
+	const codingEnvironment = resolveCodingEnvironment();
+
 	const apiKey =
 		import.meta.env.GEMINI_API_KEY?.trim() ||
 		import.meta.env.GOOGLE_CLOUD_API_KEY?.trim() ||
@@ -117,7 +164,7 @@ export const resolveGeminiRuntimeConfig = (): GeminiRuntimeConfig => {
 		null;
 
 	return {
-		codingEnvironment: resolveCodingEnvironment(),
+		codingEnvironment,
 		processingModelName:
 			import.meta.env.AI_MODEL_FOR_DOCUMENT_PROCESSING?.trim() ||
 			process.env.AI_MODEL_FOR_DOCUMENT_PROCESSING?.trim() ||
@@ -150,6 +197,10 @@ export const resolveGeminiRuntimeConfig = (): GeminiRuntimeConfig => {
 		thinkingLevel: resolveThinkingLevel(
 			import.meta.env.AI_THINKING_LEVEL?.trim() || process.env.AI_THINKING_LEVEL?.trim()
 		),
+		safetyMode: resolveSafetyMode(
+			import.meta.env.AI_SAFETY_MODE?.trim() || process.env.AI_SAFETY_MODE?.trim(),
+			codingEnvironment
+		),
 		enableGoogleSearchTool: resolveBooleanEnvironmentValue(
 			'AI_ENABLE_GOOGLE_SEARCH_TOOL',
 			import.meta.env.AI_ENABLE_GOOGLE_SEARCH_TOOL?.trim() ||
@@ -161,6 +212,8 @@ export const resolveGeminiRuntimeConfig = (): GeminiRuntimeConfig => {
 };
 
 export const buildGenerationConfig = (runtimeConfig: GeminiRuntimeConfig): GenerateContentConfig => {
+	const safetyThreshold = resolveSafetyThreshold(runtimeConfig.safetyMode);
+
 	const config: GenerateContentConfig = {
 		maxOutputTokens: runtimeConfig.maxOutputTokens,
 		temperature: runtimeConfig.temperature,
@@ -171,19 +224,19 @@ export const buildGenerationConfig = (runtimeConfig: GeminiRuntimeConfig): Gener
 		safetySettings: [
 			{
 				category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-				threshold: HarmBlockThreshold.OFF
+				threshold: safetyThreshold
 			},
 			{
 				category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-				threshold: HarmBlockThreshold.OFF
+				threshold: safetyThreshold
 			},
 			{
 				category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-				threshold: HarmBlockThreshold.OFF
+				threshold: safetyThreshold
 			},
 			{
 				category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-				threshold: HarmBlockThreshold.OFF
+				threshold: safetyThreshold
 			}
 		]
 	};

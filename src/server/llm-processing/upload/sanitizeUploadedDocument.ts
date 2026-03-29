@@ -34,6 +34,10 @@ const summarizeSanitization = (
 	context: UploadValidationContext,
 	sanitizedContent: string
 ): string => {
+	if (context.format === 'pdf') {
+		return 'PDF validado y listo para procesamiento nativo con Gemini.';
+	}
+
 	const wordCount = sanitizedContent.split(/\s+/).filter(Boolean).length;
 	return `${context.format.toUpperCase()} sanitizado con ${wordCount} palabras listas para procesar.`;
 };
@@ -83,7 +87,10 @@ export const sanitizeUploadedDocument = async (
 		sizeInBytes: context.sizeInBytes,
 		sanitizedContent,
 		summary: summarizeSanitization(context, sanitizedContent),
-		contentHash: createHash('sha256').update(sanitizedContent, 'utf-8').digest('hex'),
+		contentHash:
+			context.format === 'pdf'
+				? createHash('sha256').update(bytes).digest('hex')
+				: createHash('sha256').update(sanitizedContent, 'utf-8').digest('hex'),
 		targetPositions
 	};
 };

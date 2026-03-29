@@ -151,13 +151,27 @@ export const POST: APIRoute = async ({ request }) => {
 				2
 			)
 		);
-		logDevelopment('Sanitized content sent to AI', sanitizedDocument.sanitizedContent);
+		if (sanitizedDocument.format === 'pdf') {
+			logDevelopment(
+				'PDF source sent to AI',
+				'Se usara Files API para procesamiento nativo del PDF (sin parsing manual de texto).'
+			);
+		} else {
+			logDevelopment('Sanitized content sent to AI', sanitizedDocument.sanitizedContent);
+		}
 
 		// Dispara el flujo de optimización con Gemini
 		const configuredModels = gemini.getConfiguredModels();
 		const optimizedHTML = await gemini.optimizeCV(
 			sanitizedDocument.sanitizedContent,
-			sanitizedDocument.targetPositions
+			sanitizedDocument.targetPositions,
+			sanitizedDocument.format === 'pdf'
+				? {
+					file: candidate,
+					mimeType: sanitizedDocument.mimeType || 'application/pdf',
+					format: sanitizedDocument.format
+				}
+				: undefined
 		);
 		const safeOptimizedHTML = sanitizeHtmlDocument(optimizedHTML);
 

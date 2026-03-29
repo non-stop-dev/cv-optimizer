@@ -2,7 +2,8 @@ import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 import { MAX_PDF_PAGES, PDF_DANGEROUS_MARKERS } from '../constants';
 import { UploadSanitizationError } from '../errors';
-import { ensureContentWithinLimit } from './common';
+
+const PDF_NATIVE_GEMINI_MARKER = '[PDF_NATIVE_GEMINI_INPUT]';
 
 const ACTIVE_ACTION_SIGNATURES: ReadonlyArray<{ label: string; pattern: RegExp }> = [
 	{
@@ -33,18 +34,6 @@ const findDangerousMarker = (pdfBytes: Uint8Array): string | null => {
 	return null;
 };
 
-const isTextItem = (value: unknown): value is { str: string } => {
-	if (typeof value !== 'object' || value === null) {
-		return false;
-	}
-
-	if (!('str' in value)) {
-		return false;
-	}
-
-	return typeof value.str === 'string';
-};
-
 export const sanitizePdfDocument = async (pdfBytes: Uint8Array): Promise<string> => {
 	const dangerousMarker = findDangerousMarker(pdfBytes);
 	if (dangerousMarker) {
@@ -72,24 +61,9 @@ export const sanitizePdfDocument = async (pdfBytes: Uint8Array): Promise<string>
 			});
 		}
 
-		const pagesText: string[] = [];
-		for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-			const page = await pdf.getPage(pageNumber);
-			const textContent = await page.getTextContent();
-			const pageText = textContent.items
-				.map((item) => (isTextItem(item) ? item.str : ''))
-				.join(' ')
-				.replace(/\s+/g, ' ')
-				.trim();
-
-			if (pageText) {
-				pagesText.push(pageText);
-			}
-
-			page.cleanup();
-		}
-
-		return ensureContentWithinLimit(pagesText.join('\n\n'), 'PDF');
+		// PDF se procesa nativamente por Gemini como documento adjunto.
+		// Aqui solo validamos seguridad basica y limites de paginas.
+		return PDF_NATIVE_GEMINI_MARKER;
 	} catch (error) {
 		if (error instanceof UploadSanitizationError) {
 			throw error;
