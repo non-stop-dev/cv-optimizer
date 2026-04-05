@@ -1,5 +1,8 @@
 import { toDisplayDate } from './document-uploader-shared';
-import type { HistoryEntry } from './history-entry';
+import {
+	normalizeHistoryEntryTargetPositions,
+	type HistoryEntry
+} from './history-entry';
 
 interface RenderHistoryParams {
 	historyList: HTMLElement;
@@ -19,6 +22,7 @@ export const renderHistoryList = ({
 	historyClearButton.disabled = entries.length === 0;
 
 	for (const entry of entries) {
+		const resolvedTargetPositions = normalizeHistoryEntryTargetPositions(entry.targetPositions);
 		const item = document.createElement('li');
 		item.dataset.uploadHistoryItem = '';
 
@@ -35,13 +39,15 @@ export const renderHistoryList = ({
 			typeof entry.inputSizeInBytes === 'number'
 				? ` | ${(entry.inputSizeInBytes / 1024).toFixed(1)} KB`
 				: '';
-		const positionsLabel =
-			Array.isArray(entry.targetPositions) && entry.targetPositions.length > 0
-				? ` | Posiciones: ${entry.targetPositions.join(', ')}`
-				: '';
-		info.textContent = `${(entry.format || 'txt').toUpperCase()} | ${toDisplayDate(entry.createdAt)}${sizeLabel}${positionsLabel}`;
-
+		info.textContent = `${(entry.format || 'txt').toUpperCase()} | ${toDisplayDate(entry.createdAt)}${sizeLabel}`;
 		meta.append(fileName, info);
+
+		if (resolvedTargetPositions.length > 0) {
+			const positions = document.createElement('p');
+			positions.dataset.historyInfo = '';
+			positions.textContent = `Optimizado para: ${resolvedTargetPositions.join(', ')}`;
+			meta.appendChild(positions);
+		}
 
 		const loadButton = document.createElement('button');
 		loadButton.type = 'button';

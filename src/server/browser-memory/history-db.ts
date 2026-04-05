@@ -1,4 +1,14 @@
-import type { HistoryEntry } from './history-entry';
+import {
+	normalizeHistoryEntryTargetPositions,
+	type HistoryEntry
+} from './history-entry';
+
+const normalizeHistoryEntry = (entry: HistoryEntry): HistoryEntry => {
+	return {
+		...entry,
+		targetPositions: normalizeHistoryEntryTargetPositions(entry.targetPositions)
+	};
+};
 
 export const HISTORY_DB_NAME = 'cv-optimizer-browser-memory';
 export const HISTORY_STORE_NAME = 'cv-history';
@@ -37,7 +47,9 @@ export const readHistoryEntries = async (): Promise<HistoryEntry[]> => {
 		const request = store.getAll();
 
 		request.onsuccess = () => {
-			const entries = Array.isArray(request.result) ? (request.result as HistoryEntry[]) : [];
+			const entries = Array.isArray(request.result)
+				? (request.result as HistoryEntry[]).map(normalizeHistoryEntry)
+				: [];
 			entries.sort((left, right) => (right.createdAt ?? 0) - (left.createdAt ?? 0));
 			resolve(entries);
 		};
@@ -67,7 +79,11 @@ export const readHistoryEntryById = async (historyId: string): Promise<HistoryEn
 
 		request.onsuccess = () => {
 			const result = request.result;
-			resolve(result && typeof result === 'object' ? (result as HistoryEntry) : null);
+			resolve(
+				result && typeof result === 'object'
+					? normalizeHistoryEntry(result as HistoryEntry)
+					: null
+			);
 		};
 		request.onerror = () => reject(request.error ?? new Error('No se pudo leer la version solicitada.'));
 		transaction.oncomplete = () => closeDatabase(database);
@@ -88,7 +104,7 @@ export const writeHistoryEntry = async (entry: HistoryEntry, maxEntries = 20): P
 		const transaction = database.transaction(HISTORY_STORE_NAME, 'readwrite');
 		const store = transaction.objectStore(HISTORY_STORE_NAME);
 
-		store.put(entry);
+		store.put(normalizeHistoryEntry(entry));
 		const readRequest = store.getAll();
 		readRequest.onsuccess = () => {
 			const allEntries = Array.isArray(readRequest.result)
@@ -123,7 +139,7 @@ export const upsertHistoryEntry = async (entry: HistoryEntry): Promise<void> => 
 	await new Promise<void>((resolve, reject) => {
 		const transaction = database.transaction(HISTORY_STORE_NAME, 'readwrite');
 		const store = transaction.objectStore(HISTORY_STORE_NAME);
-		store.put(entry);
+		store.put(normalizeHistoryEntry(entry));
 
 		transaction.oncomplete = () => {
 			closeDatabase(database);

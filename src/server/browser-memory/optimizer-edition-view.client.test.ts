@@ -6,7 +6,10 @@ const mocks = vi.hoisted(() => ({
 	readHistoryEntryById: vi.fn(),
 	upsertHistoryEntry: vi.fn(),
 	applyPreviewPrimaryColor: vi.fn(),
-	downloadTextFile: vi.fn()
+	downloadTextFile: vi.fn(),
+	detectBrowserTranslationCapability: vi.fn(),
+	translateHtmlWithBrowserLocalApi: vi.fn(),
+	translateCvToEnglishWithLlmRemote: vi.fn()
 }));
 
 vi.mock('./history-db', () => ({
@@ -36,6 +39,15 @@ vi.mock('../export-cv/cv-export', () => ({
 	buildHtmlExportDocument: () => '<html></html>',
 	buildPrintableHtml: () => '<html></html>',
 	openPrintPreview: () => true
+}));
+
+vi.mock('./optimizer-edition-translation-browser-local.client', () => ({
+	detectBrowserTranslationCapability: mocks.detectBrowserTranslationCapability,
+	translateHtmlWithBrowserLocalApi: mocks.translateHtmlWithBrowserLocalApi
+}));
+
+vi.mock('./optimizer-edition-translation-llm-remote.client', () => ({
+	translateCvToEnglishWithLlmRemote: mocks.translateCvToEnglishWithLlmRemote
 }));
 
 const buildEditionDom = (): void => {
@@ -112,6 +124,9 @@ beforeEach(() => {
 		targetPositions: ['Analista de datos']
 	});
 	mocks.upsertHistoryEntry.mockResolvedValue(undefined);
+	mocks.detectBrowserTranslationCapability.mockResolvedValue('llm-remote-only');
+	mocks.translateHtmlWithBrowserLocalApi.mockResolvedValue(null);
+	mocks.translateCvToEnglishWithLlmRemote.mockResolvedValue('<p>Translated</p>');
 });
 
 afterEach(() => {
@@ -242,5 +257,23 @@ describe('optimizer-edition-view client flow', () => {
 			'<html></html>',
 			'text/html;charset=utf-8'
 		);
+	});
+
+	it('muestra en el tooltip si intentara usar la API local del navegador', async () => {
+		mocks.detectBrowserTranslationCapability.mockResolvedValue('browser-local-available');
+
+		await loadClientModule();
+
+		const tooltip = document.querySelector('[data-cv-translate-source-tooltip]');
+		expect(tooltip?.textContent).toContain('API de traduccion local disponible');
+	});
+
+	it('muestra en el tooltip si usara un LLM externo', async () => {
+		mocks.detectBrowserTranslationCapability.mockResolvedValue('llm-remote-only');
+
+		await loadClientModule();
+
+		const tooltip = document.querySelector('[data-cv-translate-source-tooltip]');
+		expect(tooltip?.textContent).toContain('LLM externo');
 	});
 });

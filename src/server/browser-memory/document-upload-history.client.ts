@@ -1,7 +1,10 @@
 import { sanitizeCvHtml } from '../llm-processing/cv-html-sanitizer';
 import { renderHistoryList } from './document-uploader-history-view';
 import { HISTORY_MAX_ENTRIES } from './document-uploader-shared';
-import type { HistoryEntry } from './history-entry';
+import {
+	normalizeHistoryEntryTargetPositions,
+	type HistoryEntry
+} from './history-entry';
 import {
 	clearHistoryEntries,
 	readHistoryEntries,
@@ -88,7 +91,7 @@ export const createDocumentUploadHistoryWorkflow = (
 				optimizedHTML: safeOptimizedHtml,
 				primaryColor: payload.primaryColor,
 				templateId: payload.templateId,
-				targetPositions: payload.targetPositions
+				targetPositions: normalizeHistoryEntryTargetPositions(payload.targetPositions)
 			},
 			HISTORY_MAX_ENTRIES
 		);

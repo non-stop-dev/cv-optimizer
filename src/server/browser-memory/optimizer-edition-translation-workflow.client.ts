@@ -1,6 +1,7 @@
 import {
 	detectBrowserTranslationCapability,
-	translateHtmlWithBrowserLocalApi
+	translateHtmlWithBrowserLocalApi,
+	type TranslationCapability
 } from './optimizer-edition-translation-browser-local.client';
 import { translateCvToEnglishWithLlmRemote } from './optimizer-edition-translation-llm-remote.client';
 
@@ -40,6 +41,7 @@ export const createOptimizerEditionTranslationWorkflow = (
 	} = options;
 
 	let translatingToEnglish = false;
+	let detectedTranslationCapability: TranslationCapability = 'llm-remote-only';
 
 	const setTranslateButtonLoadingState = (isLoading: boolean): void => {
 		translateToEnglishButton.disabled = isLoading;
@@ -66,8 +68,12 @@ export const createOptimizerEditionTranslationWorkflow = (
 	};
 
 	const refreshTranslationSourceTooltipFromAvailability = async (): Promise<void> => {
-		await detectBrowserTranslationCapability();
-		setTranslationSourceTooltip('Traduce el CV al ingles.');
+		detectedTranslationCapability = await detectBrowserTranslationCapability();
+		setTranslationSourceTooltip(
+			detectedTranslationCapability === 'browser-local-available'
+				? 'Deteccion actual: API de traduccion local disponible. Al tocar el boton se intentara traduccion local del navegador.'
+				: 'Deteccion actual: API local no disponible. Al tocar el boton se usara un LLM externo.'
+		);
 	};
 
 	const initializeTranslationTooltip = async (): Promise<void> => {
@@ -90,7 +96,13 @@ export const createOptimizerEditionTranslationWorkflow = (
 
 		translatingToEnglish = true;
 		setTranslateButtonLoadingState(true);
-		setStatus('proceso', 'Traduciendo CV', 'Estamos traduciendo el CV al ingles.');
+		setStatus(
+			'proceso',
+			'Traduciendo CV',
+			detectedTranslationCapability === 'browser-local-available'
+				? 'API local disponible. Intentando primero la traduccion del navegador.'
+				: 'API local no disponible. Se usara un LLM externo.'
+		);
 
 		try {
 			const localTranslatedHtml = await translateHtmlWithBrowserLocalApi({
@@ -108,17 +120,17 @@ export const createOptimizerEditionTranslationWorkflow = (
 				const safeLocalTranslatedHtml = sanitizeHtml(localTranslatedHtml);
 				if (safeLocalTranslatedHtml.trim()) {
 					applyTranslatedHtmlToEditor(safeLocalTranslatedHtml);
-					setTranslationSourceTooltip('Traduccion completada.');
+					setTranslationSourceTooltip('Ultima traduccion: API de traduccion del navegador.');
 					await reportTranslationSourceToServer('browser-api');
 					setStatus('exito', 'CV traducido', 'Se actualizo el editor con la version en ingles.');
 					return;
 				}
 			}
 
-			setStatus('proceso', 'Traduciendo CV', 'Continuando la traduccion...');
+			setStatus('proceso', 'Traduciendo CV', 'Traduccion local no disponible. Usando un LLM externo...');
 			const backendTranslatedHtml = await translateCvToEnglishWithLlmRemote(snapshot.optimizedHTML);
 			applyTranslatedHtmlToEditor(backendTranslatedHtml);
-			setTranslationSourceTooltip('Traduccion completada.');
+			setTranslationSourceTooltip('Ultima traduccion: LLM externo.');
 			await reportTranslationSourceToServer('llm-remote');
 			setStatus('exito', 'CV traducido', 'Se actualizo el editor con la version en ingles.');
 		} catch (error) {

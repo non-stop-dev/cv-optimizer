@@ -81,6 +81,89 @@ const getActiveRangeWithinEditor = (editor: HTMLElement): Range | null => {
 	return range;
 };
 
+const findNearestFormatAncestor = (
+	editor: HTMLElement,
+	node: Node | null,
+	wrapperTag: string
+): HTMLElement | null => {
+	let currentElement =
+		node instanceof HTMLElement ? node : node?.parentElement ?? null;
+
+	while (currentElement && currentElement !== editor) {
+		if (currentElement.tagName.toLowerCase() === wrapperTag) {
+			return currentElement;
+		}
+
+		currentElement = currentElement.parentElement;
+	}
+
+	return null;
+};
+
+const selectionCoversEntireElementContents = (
+	range: Range,
+	element: HTMLElement
+): boolean => {
+	const elementRange = document.createRange();
+	elementRange.selectNodeContents(element);
+
+	return (
+		range.compareBoundaryPoints(Range.START_TO_START, elementRange) === 0 &&
+		range.compareBoundaryPoints(Range.END_TO_END, elementRange) === 0
+	);
+};
+
+const unwrapElementPreservingSelection = (element: HTMLElement): boolean => {
+	const parent = element.parentNode;
+	if (!parent) {
+		return false;
+	}
+
+	const movedNodes = Array.from(element.childNodes);
+	if (movedNodes.length === 0) {
+		return false;
+	}
+
+	for (const child of movedNodes) {
+		parent.insertBefore(child, element);
+	}
+	parent.removeChild(element);
+
+	const selection = window.getSelection();
+	if (selection) {
+		selection.removeAllRanges();
+		const nextRange = document.createRange();
+		nextRange.setStartBefore(movedNodes[0]);
+		nextRange.setEndAfter(movedNodes[movedNodes.length - 1]);
+		selection.addRange(nextRange);
+	}
+
+	return true;
+};
+
+const toggleInlineTextFormat = (
+	editor: HTMLElement,
+	wrapperTag: string
+): boolean => {
+	const range = getActiveRangeWithinEditor(editor);
+	if (!range) {
+		return false;
+	}
+
+	const startAncestor = findNearestFormatAncestor(editor, range.startContainer, wrapperTag);
+	const endAncestor = findNearestFormatAncestor(editor, range.endContainer, wrapperTag);
+
+	if (!startAncestor || startAncestor !== endAncestor) {
+		return false;
+	}
+
+	if (!selectionCoversEntireElementContents(range, startAncestor)) {
+		return false;
+	}
+
+	return unwrapElementPreservingSelection(startAncestor);
+};
+
 const wrapActiveSelection = (
 	editor: HTMLElement,
 	createWrapper: () => HTMLElement
@@ -134,6 +217,10 @@ const normalizeLinkHref = (rawValue: string): string | null => {
 
 export const applyInlineTextFormat = (editor: HTMLElement, action: InlineTextFormat): boolean => {
 	const wrapperTag = action === 'bold' ? 'strong' : action === 'italic' ? 'em' : 'u';
+	if (toggleInlineTextFormat(editor, wrapperTag)) {
+		return true;
+	}
+
 	return wrapActiveSelection(editor, () => {
 		return document.createElement(wrapperTag);
 	});
