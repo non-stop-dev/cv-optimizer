@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
 
 import {
-	GeminiConfigurationError,
-	GeminiRequestError,
-	gemini
-} from '../../server/llm-processing/gemini-service';
+	AiProviderConfigurationError,
+	AiProviderRequestError,
+	aiProvider
+} from '../../server/llm-processing/ai-provider-service';
 import { UploadSanitizationError } from '../../server/llm-processing/upload/errors';
 import { sanitizeHtmlDocument } from '../../server/llm-processing/upload/sanitizers/html';
 import { sanitizeUploadedDocument } from '../../server/llm-processing/upload/sanitizeUploadedDocument';
@@ -160,19 +160,19 @@ export const POST: APIRoute = async ({ request }) => {
 			logDevelopment('Sanitized content sent to AI', sanitizedDocument.sanitizedContent);
 		}
 
-		// Dispara el flujo de optimización con Gemini
-		const configuredModels = gemini.getConfiguredModels();
-		const optimizedHTML = await gemini.optimizeCV(
-			sanitizedDocument.sanitizedContent,
-			sanitizedDocument.targetPositions,
-			sanitizedDocument.format === 'pdf'
+		const optimizedHTML = await aiProvider.optimizeCV({
+			content: sanitizedDocument.sanitizedContent,
+			targetPositions: sanitizedDocument.targetPositions,
+			sourceDocument:
+				sanitizedDocument.format === 'pdf'
 				? {
-					file: candidate,
-					mimeType: sanitizedDocument.mimeType || 'application/pdf',
-					format: sanitizedDocument.format
-				}
+						file: candidate,
+						mimeType: sanitizedDocument.mimeType || 'application/pdf',
+						format: sanitizedDocument.format
+					}
 				: undefined
-		);
+		});
+		const configuredModels = aiProvider.getConfiguredModels();
 		const safeOptimizedHTML = sanitizeHtmlDocument(optimizedHTML);
 
 		if (!safeOptimizedHTML.trim()) {
@@ -222,7 +222,7 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		if (error instanceof GeminiConfigurationError) {
+		if (error instanceof AiProviderConfigurationError) {
 			return toJsonResponse(
 				{
 					ok: false,
@@ -235,7 +235,7 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		if (error instanceof GeminiRequestError) {
+		if (error instanceof AiProviderRequestError) {
 			const isProviderOverloaded = error.kind === 'provider-overloaded';
 			const isQuotaExhausted = error.kind === 'quota-exhausted';
 			return toJsonResponse(

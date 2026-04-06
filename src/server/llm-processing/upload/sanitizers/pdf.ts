@@ -3,7 +3,7 @@ import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { MAX_PDF_PAGES, PDF_DANGEROUS_MARKERS } from '../constants';
 import { UploadSanitizationError } from '../errors';
 
-const PDF_NATIVE_GEMINI_MARKER = '[PDF_NATIVE_GEMINI_INPUT]';
+const PDF_NATIVE_PROVIDER_MARKER = '[PDF_NATIVE_PROVIDER_INPUT]';
 
 const ACTIVE_ACTION_SIGNATURES: ReadonlyArray<{ label: string; pattern: RegExp }> = [
 	{
@@ -61,9 +61,9 @@ export const sanitizePdfDocument = async (pdfBytes: Uint8Array): Promise<string>
 			});
 		}
 
-		// PDF se procesa nativamente por Gemini como documento adjunto.
-		// Aqui solo validamos seguridad basica y limites de paginas.
-		return PDF_NATIVE_GEMINI_MARKER;
+		// El PDF se valida aqui y luego se entrega al proveedor configurado.
+		// La extraccion real queda en la capa de integracion del proveedor.
+		return PDF_NATIVE_PROVIDER_MARKER;
 	} catch (error) {
 		if (error instanceof UploadSanitizationError) {
 			throw error;

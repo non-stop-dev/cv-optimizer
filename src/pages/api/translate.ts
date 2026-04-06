@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
 
 import {
-	GeminiConfigurationError,
-	GeminiRequestError,
-	gemini
-} from '../../server/llm-processing/gemini-service';
+	AiProviderConfigurationError,
+	AiProviderRequestError,
+	aiProvider
+} from '../../server/llm-processing/ai-provider-service';
 import { UploadSanitizationError } from '../../server/llm-processing/upload/errors';
 import { sanitizeHtmlDocument } from '../../server/llm-processing/upload/sanitizers/html';
 
@@ -150,7 +150,7 @@ export const POST: APIRoute = async ({ request }) => {
 	}
 
 	try {
-		const translatedHtml = await gemini.translateCvToEnglish(safeInputHtml);
+		const translatedHtml = await aiProvider.translateCvToEnglish(safeInputHtml);
 		let safeTranslatedHtml = '';
 		try {
 			safeTranslatedHtml = sanitizeHtmlDocument(translatedHtml);
@@ -189,7 +189,7 @@ export const POST: APIRoute = async ({ request }) => {
 			message: 'CV traducido al ingles con exito.',
 			data: {
 				translatedHTML: safeTranslatedHtml,
-				models: gemini.getConfiguredModels()
+				models: aiProvider.getConfiguredModels()
 			}
 		});
 	} catch (error) {
@@ -198,7 +198,7 @@ export const POST: APIRoute = async ({ request }) => {
 			error instanceof Error ? `${error.name}: ${error.message}` : 'Error no identificado'
 		);
 
-		if (error instanceof GeminiConfigurationError) {
+		if (error instanceof AiProviderConfigurationError) {
 			return toJsonResponse(
 				{
 					ok: false,
@@ -211,7 +211,7 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		if (error instanceof GeminiRequestError) {
+		if (error instanceof AiProviderRequestError) {
 			const isProviderOverloaded = error.kind === 'provider-overloaded';
 			const isQuotaExhausted = error.kind === 'quota-exhausted';
 			return toJsonResponse(

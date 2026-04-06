@@ -72,7 +72,7 @@ export const toFriendlyErrorMessage = (statusCode: number): string => {
 		return 'No se pudo completar la optimizacion del CV por un problema del servicio de IA.';
 	}
 	if (statusCode === 503) {
-		return 'La optimizacion no esta disponible en este entorno. Falta configurar GEMINI_API_KEY.';
+		return 'La optimizacion no esta disponible en este entorno. Falta configurar AI_PROVIDER, AI_PROVIDER_API_KEY o AI_PROVIDER_MODEL.';
 	}
 
 	return 'No pudimos procesar tu documento por ahora. Intenta nuevamente.';

@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "astro": "^6.1.1",
     "dompurify": "^3.3.3",
+    "openai": "^6.33.0",
     "pdfjs-dist": "^5.5.207",
     "sanitize-html": "^2.17.2",
     "tailwindcss": "^4.2.2",

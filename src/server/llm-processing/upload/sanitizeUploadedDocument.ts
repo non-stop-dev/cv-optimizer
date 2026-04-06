@@ -35,7 +35,7 @@ const summarizeSanitization = (
 	sanitizedContent: string
 ): string => {
 	if (context.format === 'pdf') {
-		return 'PDF validado y listo para procesamiento nativo con Gemini.';
+		return 'PDF validado y listo para procesamiento con el proveedor de IA configurado.';
 	}
 
 	const wordCount = sanitizedContent.split(/\s+/).filter(Boolean).length;
