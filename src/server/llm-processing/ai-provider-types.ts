@@ -1,4 +1,9 @@
 import type { SupportedDocumentFormat, TargetPositions } from './upload/types';
+import type {
+	OptimizeCvProcessingInfo,
+	OptimizeCvProcessingMode,
+	OptimizeCvResult
+} from './pdf-processing/pdf-processing-types';
 
 export type CodingEnvironment = 'development' | 'production';
 export type SupportedAiProvider = 'openai' | 'gemini' | 'openrouter';
@@ -67,3 +72,5 @@ export interface OptimizeCvRequest {
 	targetPositions?: TargetPositions;
 	sourceDocument?: AiSourceDocument;
 }
+
+export type { OptimizeCvProcessingInfo, OptimizeCvProcessingMode, OptimizeCvResult };

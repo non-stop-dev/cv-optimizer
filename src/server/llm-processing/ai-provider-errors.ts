@@ -2,7 +2,12 @@ export type AiProviderRequestErrorKind =
 	| 'generic'
 	| 'provider-overloaded'
 	| 'quota-exhausted'
-	| 'unsupported-model';
+	| 'unsupported-model'
+	| 'pdf-native-files-endpoint-unavailable'
+	| 'pdf-native-files-quota-exhausted'
+	| 'pdf-native-files-unsupported'
+	| 'pdf-native-files-rejected'
+	| 'pdf-text-extraction-insufficient';
 
 /**
  * Error used when the AI provider runtime configuration is incomplete or invalid.

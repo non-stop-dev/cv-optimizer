@@ -1,56 +1,86 @@
 ---
 const steps = [
-  {
-    title: 'Sube tu CV',
-    description: 'Carga tu currículum sin formato y de forma segura. Nosotros extraemos los datos útiles.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`
-  },
-  {
-    title: 'La IA lo optimiza',
-    description: 'Nuestra inteligencia artificial reescribe y mejora tus viñetas enfocándose en logros reales.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
-  },
-  {
-    title: 'Elige tu estilo',
-    description: 'Selecciona una previsualización de estilo profesional, limpia y testeada, sin preocuparte por modificar cajas de texto.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path><path d="M10 2c1 .5 2 2 2 5"></path></svg>`
-  },
-  {
-    title: 'Edita a tu gusto',
-    description: 'Revisa el resultado y haz los ajustes finales desde un editor in situ rápido.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>`
-  },
-  {
-    title: 'Descarga en múltiples formatos',
-    description: 'Exporta en PDF profesional o TXT plano para ATS con solo un clic.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
-  }
+	{
+		label: '01',
+		title: 'Sube tu documento',
+		description:
+			'Arrastras tu CV actual o un borrador incompleto. La plataforma extrae el contenido útil y limpia el ruido.'
+	},
+	{
+		label: '02',
+		title: 'La IA reescribe con criterio',
+		description:
+			'Convierte frases débiles en logros claros, reordena secciones y deja el texto listo para escanear.'
+	},
+	{
+		label: '03',
+		title: 'Ajusta el tono y el estilo',
+		description:
+			'Editas encima de la base optimizada, cambias plantilla y mantienes el contenido sin volver al punto cero.'
+	},
+	{
+		label: '04',
+		title: 'Exporta y sigue postulando',
+		description:
+			'Descargas una versión limpia para ATS y una versión visual lista para enviar a reclutadores.'
+	}
 ];
 ---
 
-<section id="workflow" class="max-w-5xl mx-auto px-6 py-20 border-t border-neutral-200">
-  <div class="text-center mb-16">
-    <h2 class="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4 font-['Sora']">
-      Un flujo diseñado para ganar entrevistas
-    </h2>
-    <p class="text-lg text-neutral-600 font-['Manrope']">
-      Hacemos en segundos lo que a ti te tomaría días entender en foros de empleabilidad.
-    </p>
-  </div>
+<section
+	id="workflow"
+	class="landing-shell relative scroll-mt-[calc(var(--nav-height)+1.5rem)] px-6 py-14 md:px-10 lg:py-20"
+>
+	<div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+		<div class="max-w-2xl">
+			<p class="brutal-chip bg-(--note-mint) px-4 py-2">
+				Workflow
+			</p>
+			<h2 class="mt-6 text-balance text-4xl font-black uppercase leading-[0.96] text-(--ink-strong) sm:text-5xl">
+				Cuando te atascas escribiendo, aquí es donde el flujo empieza a jugar a tu favor.
+			</h2>
+		</div>
 
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-    {steps.map((step, index) => (
-      <div class="bg-white p-6 rounded-xl border border-neutral-200 hover:border-neutral-300 transition-colors shadow-sm">
-        <div class="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-800 mb-5">
-          <Fragment set:html={step.icon} />
-        </div>
-        <h3 class="text-xl font-bold text-neutral-900 mb-3 font-['Sora']">
-          <span class="text-neutral-400 mr-2">{index + 1}.</span> {step.title}
-        </h3>
-        <p class="text-sm text-neutral-600 font-['Manrope'] leading-relaxed">
-          {step.description}
-        </p>
-      </div>
-    ))}
-  </div>
+		<p class="max-w-md text-base leading-relaxed text-(--ink-soft)">
+			No es solo una mejora estética. Es un recorrido pensado para transformar un archivo confuso
+			en una herramienta lista para moverse entre ofertas.
+		</p>
+	</div>
+
+	<ol
+		class="timeline-sheen mt-10 grid overflow-hidden rounded-[2rem] border-2 border-(--line) bg-white shadow-[10px_10px_0_var(--shadow)] lg:grid-cols-4"
+	>
+		{steps.map((step, index) => (
+			<li
+				class:list={[
+					'relative flex min-h-[18rem] flex-col justify-between bg-white px-6 py-6 sm:px-7 sm:py-7',
+					index > 0 ? 'border-t-2 border-(--line) lg:border-l-2 lg:border-t-0' : ''
+				]}
+			>
+				<div>
+					<p class="font-mono text-sm font-black uppercase tracking-[0.28em] text-(--accent-red)">
+						{step.label}
+					</p>
+					<h3 class="mt-4 max-w-xs text-2xl font-black uppercase leading-tight text-(--ink-strong)">
+						{step.title}
+					</h3>
+				</div>
+				<p class="max-w-sm text-base leading-relaxed text-(--ink-soft)">
+					{step.description}
+				</p>
+			</li>
+		))}
+	</ol>
+
+	<div class="mt-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+		<p class="max-w-2xl text-lg leading-relaxed text-(--ink-soft)">
+			El punto no es “tener un CV bonito”. El punto es dejar de gastar energía en la parte más
+			lenta del proceso y usarla donde sí importa: adaptar tu candidatura.
+		</p>
+
+		<a href="/optimizer" class="brutal-button brutal-button--accent self-start lg:self-auto">
+			Entrar Al Optimizer
+			<span aria-hidden="true">→</span>
+		</a>
+	</div>
 </section>

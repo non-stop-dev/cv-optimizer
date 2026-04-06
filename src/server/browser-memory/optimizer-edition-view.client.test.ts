@@ -148,6 +148,36 @@ describe('optimizer-edition-view client flow', () => {
 		expect(redoButton.disabled).toBe(true);
 	});
 
+	it('muestra el aviso persistido cuando la version uso fallback PDF a texto', async () => {
+		mocks.readHistoryEntryById.mockResolvedValueOnce({
+			id: 'entry-1',
+			createdAt: Date.now(),
+			sourceFileName: 'cv-test.pdf',
+			safeFileName: 'cv-test.pdf',
+			format: 'pdf',
+			inputSizeInBytes: 1024,
+			summary: 'Resumen',
+			contentHash: 'hash',
+			optimizedHTML: '<p>Original</p>',
+			primaryColor: '#0f766e',
+			templateId: 'default',
+			targetPositions: ['Analista de datos'],
+			processingMode: 'pdf-text-fallback',
+			processingNotice:
+				'El proveedor no pudo procesar el PDF de forma nativa. Se uso una extraccion validada de texto como fallback.'
+		});
+
+		await loadClientModule();
+
+		const outputMeta = document.querySelector('[data-output-meta]');
+		const statusMessage = document.querySelector('[data-output-status-message]');
+
+		expect(outputMeta?.textContent).toContain('fallback a texto validado');
+		expect(statusMessage?.textContent).toContain(
+			'Se uso una extraccion validada de texto como fallback'
+		);
+	});
+
 	it('guarda cambios con debounce y soporta undo/redo por teclado', async () => {
 		await loadClientModule();
 

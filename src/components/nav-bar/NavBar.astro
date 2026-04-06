@@ -1,17 +1,24 @@
-<header class="relative z-20 pt-6 md:pt-8">
-	<div class="mx-auto w-full max-w-5xl px-6 md:px-10">
-		<nav class="glass-card flex h-16 w-full items-center justify-between rounded-2xl px-6" aria-label="Principal">
-			<a href="/" class="text-2xl font-extrabold tracking-tight md:text-3xl hover:opacity-90 transition-opacity">
-				<span class="text-(--brand-cv)">CV</span>
-				<span class="px-1 text-(--ink-strong)"> </span>
-				<span class="text-(--brand-optimizer)">Optimizer</span>
+<header class="sticky top-0 z-50 h-[var(--nav-height)] w-full border-b-2 border-(--line) bg-white shadow-[0_8px_0_var(--shadow)]">
+	<nav
+		class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-4 px-6 md:px-10 lg:px-12"
+		aria-label="Principal"
+	>
+		<a href="/" class="min-w-0 text-2xl font-black uppercase tracking-[-0.04em] text-(--ink-strong) md:text-3xl">
+			<span class="text-(--brand-cv)">CV</span>
+			<span> Optimizer</span>
+		</a>
+
+		<div class="hidden items-center justify-center gap-3 sm:flex">
+			<span class="brutal-chip bg-(--note-yellow) px-3 py-2 text-[0.62rem]">
+				Neo Draft
+			</span>
+			<a href="#workflow" class="font-mono text-xs font-bold uppercase tracking-[0.24em] text-(--ink-soft)">
+				Workflow
 			</a>
-			
-			<div></div>
-			
-			<a href="/optimizer" class="bg-neutral-900 text-white px-5 py-2 rounded-md font-medium text-sm hover:bg-neutral-800 transition-colors">
-				Optimizar
-			</a>
-		</nav>
-	</div>
+		</div>
+
+		<a href="/optimizer" class="brutal-button brutal-button--accent px-4 py-3 text-sm">
+			Optimizar
+		</a>
+	</nav>
 </header>

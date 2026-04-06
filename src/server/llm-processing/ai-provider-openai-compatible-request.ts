@@ -83,6 +83,14 @@ interface OpenRouterFileParserPlugin {
 	};
 }
 
+type ChatCompletionTextPart = Extract<ChatCompletionContentPart, { type: 'text' }>;
+
+const isChatCompletionTextPart = (
+	part: ChatCompletionContentPart
+): part is ChatCompletionTextPart => {
+	return part.type === 'text';
+};
+
 export interface OpenAiCompatibleChatRequest {
 	request: ChatCompletionCreateParamsNonStreaming;
 	normalizedSystemPrompt: string;
@@ -291,9 +299,13 @@ export const extractChatCompletionText = (completion: ChatCompletion): string =>
 		return messageContent.trim();
 	}
 
-	if (Array.isArray(messageContent)) {
-		const text = messageContent
-			.filter((part) => part.type === 'text')
+	const messageParts = Array.isArray(messageContent)
+		? (messageContent as ChatCompletionContentPart[])
+		: null;
+
+	if (messageParts) {
+		const text = messageParts
+			.filter(isChatCompletionTextPart)
 			.map((part) => part.text)
 			.join('\n')
 			.trim();

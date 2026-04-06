@@ -154,6 +154,19 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 			throw new UploadFlowError('La respuesta de IA llego vacia.', 'AI_EMPTY_RESPONSE');
 		}
 
+		const processingMode =
+			typeof payload?.data?.processing?.mode === 'string'
+				? payload.data.processing.mode
+				: undefined;
+		const processingNotice =
+			typeof payload?.data?.processing?.notice === 'string'
+				? payload.data.processing.notice.trim()
+				: '';
+		const visibleProcessingNotice =
+			processingMode === 'pdf-native-input' || processingMode === 'pdf-text-fallback'
+				? processingNotice
+				: '';
+
 		const normalizedTargetPositions = Array.isArray(payload?.data?.targetPositions)
 			? toTargetPositionsFromPayload(payload.data.targetPositions)
 			: requestTargetPositions;
@@ -181,7 +194,9 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 				optimizedHTML,
 				primaryColor: dom.cvPrimaryColorPicker.value,
 				templateId: DEFAULT_CV_TEMPLATE_ID,
-				targetPositions: normalizedTargetPositions
+				targetPositions: normalizedTargetPositions,
+				processingMode,
+				processingNotice: visibleProcessingNotice || undefined
 			});
 		} catch (historyError) {
 			console.error('No se pudo guardar la version en historial local.', historyError);
@@ -195,8 +210,14 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 		statusWorkflow.setStatus(
 			'exito',
 			'Documento subido',
-			'Tu CV se proceso correctamente y esta listo para optimizacion.'
+			visibleProcessingNotice ||
+				'Tu CV se proceso correctamente y esta listo para optimizacion.'
 		);
+
+		if (visibleProcessingNotice) {
+			statusWorkflow.appendLog(visibleProcessingNotice, 'completado');
+		}
+
 		statusWorkflow.appendLog('Proceso completado', 'completado');
 
 		if (typeof createdHistoryId === 'string' && createdHistoryId.length > 0) {

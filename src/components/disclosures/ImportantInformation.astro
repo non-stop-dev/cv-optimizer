@@ -5,36 +5,53 @@ interface Props {
 
 const { cardless = false } = Astro.props as Props;
 
-const containerClass = cardless
-	? 'p-6 md:p-8'
-	: 'p-6 md:p-8';
+const sectionClass = cardless
+	? 'px-0 py-0'
+	: 'border-2 border-(--line) bg-white px-6 py-7 shadow-[10px_10px_0_var(--shadow)] sm:px-8 sm:py-8';
 ---
 
-<section class="mx-auto mt-6 w-full max-w-5xl px-6 md:px-10" aria-labelledby="important-info-title">
-	<div class={containerClass}>
-		<div class="space-y-2">
-			<h2 id="important-info-title" class="text-2xl font-extrabold md:text-3xl">Información importante</h2>
-			<p class="max-w-3xl text-sm leading-relaxed text-(--ink-soft) md:text-base">
-				Antes de continuar, revisa estos puntos para proteger tu información y usar la plataforma con seguridad.
+<section class="landing-shell mt-4 px-6 pb-16 md:px-10 lg:pb-24" aria-labelledby="important-info-title">
+	<div class={sectionClass}>
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+			<div class="max-w-2xl">
+				<p class="brutal-chip bg-(--note-blue) px-4 py-2">
+					Antes De Continuar
+				</p>
+				<h2 id="important-info-title" class="mt-5 text-3xl font-black uppercase leading-none text-(--ink-strong) sm:text-4xl">
+					Información importante
+				</h2>
+			</div>
+
+			<p class="max-w-md text-sm leading-relaxed text-(--ink-soft) sm:text-base">
+				La experiencia está pensada para que trabajes con tranquilidad y mantengas el control
+				del documento.
 			</p>
 		</div>
 
-		<div class="mt-6 space-y-3">
-			<details class="rounded-xl border border-(--line) bg-white/70 p-4" open>
-				<summary class="cursor-pointer text-base font-bold text-(--ink-strong)">
+		<div class="mt-8 space-y-4">
+			<details class="border-2 border-(--line) bg-(--paper) px-5 py-4" open>
+				<summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-black uppercase text-(--ink-strong)">
 					Tus datos se guardan de forma local
+					<span aria-hidden="true" class="font-mono text-sm tracking-[0.24em] text-(--ink-soft)">
+						01
+					</span>
 				</summary>
-				<p class="mt-3 text-sm leading-relaxed text-(--ink-soft) md:text-base">
-					Tu CV y los cambios que hagas se guardan localmente. Si cambias de dispositivo, deberás empezar de cero.
+				<p class="mt-3 max-w-3xl text-sm leading-relaxed text-(--ink-soft) md:text-base">
+					Tu CV y los cambios que hagas se guardan localmente en este navegador. Si cambias de
+					dispositivo, deberás empezar de cero.
 				</p>
 			</details>
 
-			<details class="rounded-xl border border-(--line) bg-white/70 p-4">
-				<summary class="cursor-pointer text-base font-bold text-(--ink-strong)">
-					Recomendación para no perder trabajo
+			<details class="border-2 border-(--line) bg-(--paper) px-5 py-4">
+				<summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-black uppercase text-(--ink-strong)">
+					Descarga cuando cierres una buena versión
+					<span aria-hidden="true" class="font-mono text-sm tracking-[0.24em] text-(--ink-soft)">
+						02
+					</span>
 				</summary>
-				<p class="mt-3 text-sm leading-relaxed text-(--ink-soft) md:text-base">
-					Descarga tu CV cada vez que completes una versión importante. Así mantendrás una copia lista para enviar a cualquier proceso.
+				<p class="mt-3 max-w-3xl text-sm leading-relaxed text-(--ink-soft) md:text-base">
+					Cada vez que llegues a un resultado sólido, exporta tu CV. Así conservas una copia lista
+					para la siguiente postulación.
 				</p>
 			</details>
 		</div>

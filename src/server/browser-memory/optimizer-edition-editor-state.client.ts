@@ -386,11 +386,24 @@ export const createOptimizerEditionEditorStateController = (
 				normalizedEntry.targetPositions.length > 0
 					? ` | Posiciones objetivo: ${normalizedEntry.targetPositions.join(', ')}`
 					: '';
-			dom.outputMeta.textContent = `Version: ${sourceName}${positionsLabel}`;
+			const processingLabel =
+				normalizedEntry.processingMode === 'pdf-text-fallback'
+					? ' | Entrada PDF: fallback a texto validado'
+					: normalizedEntry.processingMode === 'pdf-native-input'
+						? ' | Entrada PDF nativa'
+						: '';
+			dom.outputMeta.textContent = `Version: ${sourceName}${positionsLabel}${processingLabel}`;
+			const processingNotice =
+				normalizedEntry.processingMode === 'pdf-native-input' ||
+				normalizedEntry.processingMode === 'pdf-text-fallback'
+					? normalizedEntry.processingNotice?.trim()
+					: '';
 			setStatus(
 				'exito',
 				'Version lista',
-				'Puedes editar el CV y exportarlo en el formato que prefieras.'
+				processingNotice
+					? `${processingNotice} Puedes editar el CV y exportarlo en el formato que prefieras.`
+					: 'Puedes editar el CV y exportarlo en el formato que prefieras.'
 			);
 			setSaveIndicator('saved', 'Autoguardado');
 		} catch (error) {

@@ -21,12 +21,14 @@ import {
 	executeOpenAiCompatibleChatText
 } from './ai-provider-openai-compatible-client';
 import { CV_OPTIMIZER_SYSTEM_PROMPT } from './cv-optimizer-system-prompt';
+import { optimizePdfWithNativeFallback } from './pdf-processing/pdf-native-optimization-workflow';
 import type {
 	AiChatGenerationRequest,
 	AiConfiguredModels,
 	AiProviderRuntimeConfig,
 	AiProviderRuntimeMetadata,
-	OptimizeCvRequest
+	OptimizeCvRequest,
+	OptimizeCvResult
 } from './ai-provider-types';
 
 interface AiProviderServiceDependencies {
@@ -188,38 +190,11 @@ export class AiProviderService {
 		return text;
 	}
 
-	/**
-	 * Optimizes a sanitized CV while keeping the provider-specific transport hidden.
-	 */
-	public async optimizeCV({
+	private async generateOptimizedCvHtml({
 		content,
 		targetPositions = [],
 		sourceDocument
 	}: OptimizeCvRequest): Promise<string> {
-		const runtimeConfig = this.getRuntimeConfig();
-		const runtimeMetadata = this.getRuntimeMetadata();
-
-		if (runtimeConfig.provider === 'gemini' && isPdfSourceDocument(sourceDocument)) {
-			try {
-				return await this.optimizeCvWithGeminiNativePdf({
-					client: this.createGeminiPdfClient(runtimeConfig.apiKey),
-					model: runtimeConfig.model,
-					systemPrompt: CV_OPTIMIZER_SYSTEM_PROMPT,
-					content,
-					targetPositions,
-					sourceDocument,
-					logDevelopment: this.logDevelopment.bind(this),
-					runtimeMetadata
-				});
-			} catch (error) {
-				if (error instanceof AiProviderConfigurationError || error instanceof AiProviderRequestError) {
-					throw error;
-				}
-
-				return mapGeminiNativePdfError(error);
-			}
-		}
-
 		return this.generateChatText({
 			systemPrompt: CV_OPTIMIZER_SYSTEM_PROMPT,
 			userPrompt: buildOptimizeCvUserContent(
@@ -229,6 +204,92 @@ export class AiProviderService {
 			),
 			sourceDocument
 		});
+	}
+
+	private async generateGeminiNativePdfHtml({
+		content,
+		targetPositions = [],
+		sourceDocument,
+		runtimeConfig,
+		runtimeMetadata
+	}: OptimizeCvRequest & {
+		sourceDocument: NonNullable<OptimizeCvRequest['sourceDocument']>;
+		runtimeConfig: AiProviderRuntimeConfig;
+		runtimeMetadata: AiProviderRuntimeMetadata;
+	}): Promise<string> {
+		try {
+			return await this.optimizeCvWithGeminiNativePdf({
+				client: this.createGeminiPdfClient(runtimeConfig.apiKey),
+				model: runtimeConfig.model,
+				systemPrompt: CV_OPTIMIZER_SYSTEM_PROMPT,
+				content,
+				targetPositions,
+				sourceDocument,
+				logDevelopment: this.logDevelopment.bind(this),
+				runtimeMetadata
+			});
+		} catch (error) {
+			if (error instanceof AiProviderConfigurationError || error instanceof AiProviderRequestError) {
+				throw error;
+			}
+
+			return mapGeminiNativePdfError(error);
+		}
+	}
+
+	/**
+	 * Optimizes a sanitized CV while keeping the provider-specific transport hidden.
+	 */
+	public async optimizeCV({
+		content,
+		targetPositions = [],
+		sourceDocument
+	}: OptimizeCvRequest): Promise<OptimizeCvResult> {
+		const runtimeConfig = this.getRuntimeConfig();
+		const runtimeMetadata = this.getRuntimeMetadata();
+
+		if (isPdfSourceDocument(sourceDocument)) {
+			return optimizePdfWithNativeFallback({
+				sourceDocument,
+				logDevelopment: this.logDevelopment.bind(this),
+				nativePdfAttempt: async () => {
+					if (runtimeConfig.provider === 'gemini') {
+						return this.generateGeminiNativePdfHtml({
+							content,
+							targetPositions,
+							sourceDocument,
+							runtimeConfig,
+							runtimeMetadata
+						});
+					}
+
+					return this.generateOptimizedCvHtml({
+						content,
+						targetPositions,
+						sourceDocument
+					});
+				},
+				textFallbackAttempt: async (extractedText) => {
+					return this.generateOptimizedCvHtml({
+						content: extractedText,
+						targetPositions
+					});
+				}
+			});
+		}
+
+		const optimizedHtml = await this.generateOptimizedCvHtml({
+			content,
+			targetPositions
+		});
+
+		return {
+			optimizedHtml,
+			processing: {
+				mode: 'text-direct',
+				notice: 'Documento procesado con el proveedor configurado.'
+			}
+		};
 	}
 
 	/**

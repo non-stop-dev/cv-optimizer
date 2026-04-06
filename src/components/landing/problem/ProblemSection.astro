@@ -1,50 +1,136 @@
----
----
+<section class="landing-shell relative px-6 py-8 md:px-10 lg:py-12">
+	<div class="grid items-start gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
+		<div class="max-w-lg">
+			<p class="brutal-chip bg-(--note-blue) px-4 py-2">
+				Lo Que Suele Fallar
+			</p>
 
-<section class="max-w-5xl mx-auto px-6 py-20 border-t border-neutral-200">
-  <div class="grid md:grid-cols-2 gap-12 items-center">
-    <div>
-      <h2 class="text-3xl sm:text-4xl font-bold text-neutral-900 mb-6 font-['Sora']">
-        ¿Te rechazan por culpa de un mal formato?
-      </h2>
-      <p class="text-lg text-neutral-600 mb-6 font-['Manrope'] leading-relaxed">
-        El contenido de tu experiencia es valioso, pero a menudo los reclutadores y sistemas ATS lo ignoran porque está mal estructurado. Plantillas complejas, columnas dobles de Canva o estilos desordenados hacen que tu perfil sea descartado en segundos.
-      </p>
-      <ul class="space-y-4 text-neutral-600">
-        <li class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-          Sistemas ATS no pueden leer el contenido de tu PDF generado en plataformas de diseño.
-        </li>
-        <li class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-          Exceso de viñetas genéricas en lugar de logros tangibles y con impacto profesional.
-        </li>
-      </ul>
-    </div>
-    <div class="bg-neutral-50 rounded-2xl p-8 flex items-center justify-center border border-neutral-100 relative overflow-hidden">
-      <!-- Illustrative abstract elements representing chaos -->
-      <div class="relative w-full aspect-square max-w-sm flex items-center justify-center">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-32 h-32 text-neutral-300 absolute -top-4 -left-4">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-24 h-24 text-neutral-800 z-10 rotate-12">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-20 h-20 text-neutral-400 absolute bottom-4 right-0 -rotate-12">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-      </div>
-    </div>
-  </div>
+			<h2 class="mt-6 text-balance text-4xl font-black uppercase leading-[0.96] text-(--ink-strong) sm:text-5xl">
+				El problema no es tu perfil. Es que el CV se rompe antes de llegar a quien decide.
+			</h2>
+
+			<p class="mt-5 text-lg leading-relaxed text-(--ink-soft)">
+				Muchos CV no pierden por falta de experiencia, pierden porque el ATS no consigue leerlos
+				bien. Si el parser tropieza con columnas, adornos, iconos o textos ambiguos, tu perfil
+				se ordena peor, se entiende peor y muchas veces ni siquiera llega al reviewer humano.
+			</p>
+
+			<ul class="mt-8 space-y-4 text-base leading-relaxed text-(--ink-soft)">
+				<li class="flex gap-3">
+					<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--accent-red) text-sm font-black text-white">
+						1
+					</span>
+					Diseños en 2 columnas, barras de nivel e iconos que se ven “pro”, pero confunden al ATS
+					y mezclan información clave.
+				</li>
+				<li class="flex gap-3">
+					<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--note-yellow) text-sm font-black text-(--ink-strong)">
+						2
+					</span>
+					Keywording pobre o genérico: falta el vocabulario del puesto, de la industria y de las
+					responsabilidades por las que te están filtrando.
+				</li>
+				<li class="flex gap-3">
+					<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--note-mint) text-sm font-black text-(--ink-strong)">
+						3
+					</span>
+					Logros escritos como tareas: no explican impacto, contexto ni valor, así que no ayudan ni
+					al sistema ni a la persona que revisa después.
+				</li>
+			</ul>
+		</div>
+
+		<div class="relative">
+			<aside
+				class="brutal-warning warning-jolt absolute -left-3 top-6 z-20 max-w-[15rem]"
+				aria-label="ATS Warning"
+			>
+				<div class="flex items-start gap-3">
+					<span class="warning-icon warning-icon-beacon" aria-hidden="true">
+						<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.6">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 4.25 20.2 19H3.8L12 4.25Z"
+							></path>
+							<path stroke-linecap="round" d="M12 9v4.9"></path>
+							<circle cx="12" cy="17.1" r="1.1" fill="currentColor" stroke="none"></circle>
+						</svg>
+					</span>
+
+					<div class="min-w-0">
+						<p class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-white">
+							ATS Warning
+						</p>
+						<p class="mt-2 max-w-[12rem] text-sm leading-relaxed text-white/95">
+							Lo decorativo no siempre se traduce en legible.
+						</p>
+					</div>
+				</div>
+			</aside>
+
+			<div class="brutal-paper px-6 py-7 sm:px-8 sm:py-8">
+				<div class="relative z-10">
+					<div class="border-b-2 border-(--line) pb-5">
+						<p class="font-mono text-[0.72rem] font-bold uppercase tracking-[0.24em] text-(--ink-soft)">
+							Radiografía Del Borrador
+						</p>
+						<h3 class="mt-3 text-3xl font-black uppercase leading-none text-(--ink-strong)">
+							Lo que te frena al hacerlo solo
+						</h3>
+					</div>
+
+					<div class="mt-6 divide-y-2 divide-(--line)">
+						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
+						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)">
+							Intento 01
+						</p>
+						<div>
+							<p class="text-xl font-black uppercase text-(--ink-strong)">
+								El ATS no interpreta la maqueta
+							</p>
+							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
+								Columnas, bloques decorativos y jerarquías visuales bonitas para humanos terminan
+								rompiendo el orden lógico que el parser necesita para leer experiencia, skills y
+								fechas correctamente.
+							</p>
+						</div>
+					</div>
+
+						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
+						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)">
+							Intento 02
+						</p>
+						<div>
+							<p class="text-xl font-black uppercase text-(--ink-strong)">
+								Faltan keywords & sobra ambigüedad
+							</p>
+							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
+								Si el CV no nombra herramientas, responsabilidades y términos del rol con claridad,
+								no suma puntos en filtros automáticos. Y si además describe logros como tareas, el
+								valor real queda escondido.
+							</p>
+						</div>
+					</div>
+
+						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
+						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--brand-optimizer)">
+							Salida
+						</p>
+						<div>
+							<p class="text-xl font-black uppercase text-(--ink-strong)">
+								Pasa filtros sin perder fuerza humana
+							</p>
+							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
+								CV Optimizer ordena el contenido para que el ATS lo entienda, refuerza el keywording
+								y convierte experiencia difusa en logros que se explican solos cuando por fin lo lee
+								una persona.
+							</p>
+						</div>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>

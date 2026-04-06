@@ -1,6 +1,10 @@
 import OpenAI from 'openai';
 import { AiProviderRequestError } from './ai-provider-errors';
 import type { SupportedAiProvider } from './ai-provider-types';
+import {
+	classifyPdfNativeFailure,
+	toPdfNativeFallbackKind
+} from './pdf-processing/pdf-native-provider-fallback';
 
 interface GeminiNativeApiErrorInfo {
 	status?: number;
@@ -18,6 +22,22 @@ const providerLabelMap: Record<SupportedAiProvider, string> = {
 
 const toProviderLabel = (provider: SupportedAiProvider): string => {
 	return providerLabelMap[provider];
+};
+
+const throwPdfNativeFallbackErrorIfApplicable = (
+	message: string | undefined,
+	error: unknown
+): never | void => {
+	const category = classifyPdfNativeFailure({ message });
+	if (!category) {
+		return;
+	}
+
+	throw new AiProviderRequestError(
+		message?.trim() || 'El proveedor no pudo procesar el PDF subido.',
+		error,
+		toPdfNativeFallbackKind(category)
+	);
 };
 
 const isLikelyUnsupportedModelError = (status: number | undefined, message: string | undefined): boolean => {
@@ -60,6 +80,7 @@ export const mapOpenAiCompatibleError = (
 	}
 
 	if (error instanceof OpenAI.RateLimitError) {
+		throwPdfNativeFallbackErrorIfApplicable(error.message, error);
 		throw new AiProviderRequestError(
 			error.message?.trim() ||
 				`Se excedio la cuota o el rate limit de ${providerLabel}. Revisa billing y limites de uso.`,
@@ -69,6 +90,7 @@ export const mapOpenAiCompatibleError = (
 	}
 
 	if (error instanceof OpenAI.InternalServerError) {
+		throwPdfNativeFallbackErrorIfApplicable(error.message, error);
 		throw new AiProviderRequestError(
 			error.message?.trim() ||
 				`${providerLabel} esta saturado temporalmente. Intenta de nuevo en unos minutos.`,
@@ -78,6 +100,8 @@ export const mapOpenAiCompatibleError = (
 	}
 
 	if (error instanceof OpenAI.APIError) {
+		throwPdfNativeFallbackErrorIfApplicable(error.message, error);
+
 		if (error.status === 402 || error.status === 429) {
 			throw new AiProviderRequestError(
 				error.message?.trim() ||
@@ -158,7 +182,8 @@ export const mapGeminiNativePdfError = (error: unknown): never => {
 			: '';
 		throw new AiProviderRequestError(
 			`La API de Gemini no esta habilitada para esta API key.${activationHint}`,
-			error
+			error,
+			'pdf-native-files-endpoint-unavailable'
 		);
 	}
 
@@ -170,6 +195,7 @@ export const mapGeminiNativePdfError = (error: unknown): never => {
 	}
 
 	if (apiErrorInfo.status === 503 || apiErrorInfo.apiStatus === 'UNAVAILABLE') {
+		throwPdfNativeFallbackErrorIfApplicable(apiErrorInfo.message, error);
 		throw new AiProviderRequestError(
 			apiErrorInfo.message?.trim() ||
 				'El proveedor Gemini esta saturado temporalmente. Intenta de nuevo en unos minutos.',
@@ -179,6 +205,7 @@ export const mapGeminiNativePdfError = (error: unknown): never => {
 	}
 
 	if (apiErrorInfo.status === 429 || apiErrorInfo.apiStatus === 'RESOURCE_EXHAUSTED') {
+		throwPdfNativeFallbackErrorIfApplicable(apiErrorInfo.message, error);
 		throw new AiProviderRequestError(
 			apiErrorInfo.message?.trim() ||
 				'Se excedio la cuota del proveedor Gemini. Revisa plan, billing y limites de uso.',
@@ -187,6 +214,7 @@ export const mapGeminiNativePdfError = (error: unknown): never => {
 		);
 	}
 
+	throwPdfNativeFallbackErrorIfApplicable(apiErrorInfo.message, error);
 	console.error('❌ Error llamando al flujo PDF nativo de Gemini:', error);
 	throw new AiProviderRequestError('No se pudo procesar el CV con la IA.', error);
 };

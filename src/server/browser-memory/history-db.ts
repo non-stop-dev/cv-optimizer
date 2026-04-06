@@ -1,4 +1,6 @@
 import {
+	normalizeHistoryEntryProcessingMode,
+	normalizeHistoryEntryProcessingNotice,
 	normalizeHistoryEntryTargetPositions,
 	type HistoryEntry
 } from './history-entry';
@@ -6,7 +8,9 @@ import {
 const normalizeHistoryEntry = (entry: HistoryEntry): HistoryEntry => {
 	return {
 		...entry,
-		targetPositions: normalizeHistoryEntryTargetPositions(entry.targetPositions)
+		targetPositions: normalizeHistoryEntryTargetPositions(entry.targetPositions),
+		processingMode: normalizeHistoryEntryProcessingMode(entry.processingMode),
+		processingNotice: normalizeHistoryEntryProcessingNotice(entry.processingNotice)
 	};
 };
 

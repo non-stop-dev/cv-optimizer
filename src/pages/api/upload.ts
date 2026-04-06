@@ -160,7 +160,7 @@ export const POST: APIRoute = async ({ request }) => {
 			logDevelopment('Sanitized content sent to AI', sanitizedDocument.sanitizedContent);
 		}
 
-		const optimizedHTML = await aiProvider.optimizeCV({
+		const optimizationResult = await aiProvider.optimizeCV({
 			content: sanitizedDocument.sanitizedContent,
 			targetPositions: sanitizedDocument.targetPositions,
 			sourceDocument:
@@ -173,7 +173,11 @@ export const POST: APIRoute = async ({ request }) => {
 				: undefined
 		});
 		const configuredModels = aiProvider.getConfiguredModels();
-		const safeOptimizedHTML = sanitizeHtmlDocument(optimizedHTML);
+		logDevelopment(
+			'Upload processing mode',
+			JSON.stringify(optimizationResult.processing, null, 2)
+		);
+		const safeOptimizedHTML = sanitizeHtmlDocument(optimizationResult.optimizedHtml);
 
 		if (!safeOptimizedHTML.trim()) {
 			logDevelopment('AI empty response', 'El HTML optimizado llego vacio tras sanitizacion.');
@@ -200,7 +204,8 @@ export const POST: APIRoute = async ({ request }) => {
 				contentHash: sanitizedDocument.contentHash,
 				targetPositions: sanitizedDocument.targetPositions,
 				optimizedHTML: safeOptimizedHTML, // Contenido enriquecido por la IA
-				models: configuredModels
+				models: configuredModels,
+				processing: optimizationResult.processing
 			}
 		});
 	} catch (error) {
@@ -238,19 +243,29 @@ export const POST: APIRoute = async ({ request }) => {
 		if (error instanceof AiProviderRequestError) {
 			const isProviderOverloaded = error.kind === 'provider-overloaded';
 			const isQuotaExhausted = error.kind === 'quota-exhausted';
+			const isPdfTextExtractionInsufficient =
+				error.kind === 'pdf-text-extraction-insufficient';
 			return toJsonResponse(
 				{
 					ok: false,
 					error: {
-						code: isProviderOverloaded
-							? 'AI_PROVIDER_OVERLOADED'
-							: isQuotaExhausted
-								? 'AI_QUOTA_EXHAUSTED'
-								: 'AI_PROCESSING_FAILED',
+						code: isPdfTextExtractionInsufficient
+							? 'PDF_TEXT_EXTRACTION_INSUFFICIENT'
+							: isProviderOverloaded
+								? 'AI_PROVIDER_OVERLOADED'
+								: isQuotaExhausted
+									? 'AI_QUOTA_EXHAUSTED'
+									: 'AI_PROCESSING_FAILED',
 						message: error.message
 					}
 				},
-				isProviderOverloaded ? 503 : isQuotaExhausted ? 429 : 502
+				isPdfTextExtractionInsufficient
+					? 422
+					: isProviderOverloaded
+						? 503
+						: isQuotaExhausted
+							? 429
+							: 502
 			);
 		}
 

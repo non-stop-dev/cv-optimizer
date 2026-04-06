@@ -1,7 +1,10 @@
 import { sanitizeCvHtml } from '../llm-processing/cv-html-sanitizer';
+import type { OptimizeCvProcessingMode } from '../llm-processing/ai-provider-types';
 import { renderHistoryList } from './document-uploader-history-view';
 import { HISTORY_MAX_ENTRIES } from './document-uploader-shared';
 import {
+	normalizeHistoryEntryProcessingMode,
+	normalizeHistoryEntryProcessingNotice,
 	normalizeHistoryEntryTargetPositions,
 	type HistoryEntry
 } from './history-entry';
@@ -23,6 +26,8 @@ export interface DocumentUploadSaveHistoryPayload {
 	primaryColor: string;
 	templateId: HistoryEntry['templateId'];
 	targetPositions: string[];
+	processingMode?: OptimizeCvProcessingMode;
+	processingNotice?: string;
 }
 
 interface CreateDocumentUploadHistoryWorkflowOptions {
@@ -91,7 +96,9 @@ export const createDocumentUploadHistoryWorkflow = (
 				optimizedHTML: safeOptimizedHtml,
 				primaryColor: payload.primaryColor,
 				templateId: payload.templateId,
-				targetPositions: normalizeHistoryEntryTargetPositions(payload.targetPositions)
+				targetPositions: normalizeHistoryEntryTargetPositions(payload.targetPositions),
+				processingMode: normalizeHistoryEntryProcessingMode(payload.processingMode),
+				processingNotice: normalizeHistoryEntryProcessingNotice(payload.processingNotice)
 			},
 			HISTORY_MAX_ENTRIES
 		);
