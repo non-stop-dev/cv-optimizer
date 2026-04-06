@@ -1,0 +1,42 @@
+.landing-page {
+	position: relative;
+	isolation: isolate;
+	overflow: clip;
+	background:
+		linear-gradient(rgba(17, 17, 17, 0.075) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(17, 17, 17, 0.075) 1px, transparent 1px),
+		linear-gradient(180deg, #f8f3e9 0%, #f2ebdc 100%);
+	background-size: 2rem 2rem, 2rem 2rem, 100% 100%;
+}
+
+.landing-page::before,
+.landing-page::after {
+	content: "";
+	position: absolute;
+	inset: auto;
+	border-radius: 999px;
+	filter: blur(8px);
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.landing-page::before {
+	top: 5rem;
+	left: -4rem;
+	width: 16rem;
+	height: 16rem;
+	background: rgba(255, 90, 54, 0.12);
+}
+
+.landing-page::after {
+	right: -5rem;
+	bottom: 10rem;
+	width: 18rem;
+	height: 18rem;
+	background: rgba(0, 163, 122, 0.14);
+}
+
+.landing-shell {
+	width: min(92rem, calc(100vw - 1.5rem));
+	margin-inline: auto;
+}

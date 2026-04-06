@@ -1,5 +1,6 @@
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
+import { UploadSanitizationError } from '../upload/errors';
 import { normalizePlainText } from '../upload/sanitizers/common';
 import type {
 	PdfPageTextMetrics,
@@ -285,6 +286,17 @@ export const extractTextFromPdf = async (
 				normalizedDocumentText
 			)
 		};
+	} catch (error) {
+		if (error instanceof UploadSanitizationError) {
+			throw error;
+		}
+
+		throw new UploadSanitizationError({
+			code: 'PARSE_ERROR',
+			statusCode: 422,
+			message: 'No se pudo extraer texto util del PDF para abrirlo directamente en el editor.',
+			cause: error
+		});
 	} finally {
 		await loadingTask.destroy();
 	}

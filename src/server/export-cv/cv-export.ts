@@ -1,5 +1,6 @@
 import { sanitizeCvHtml } from '../llm-processing/cv-html-sanitizer';
 import { buildCvTemplateCss } from '../../styles/cv-templates/cv-template-css';
+import { buildPrintableEditablePayloadBlock } from './cv-printable-editable-payload';
 import {
 	CV_TEMPLATE_OPTIONS,
 	DEFAULT_CV_TEMPLATE_ID,
@@ -72,6 +73,22 @@ ${buildCvTemplateCss('.cv-doc', safeTemplateId)}
 	background: #ffe4e6;
 	border: 1px solid #fb7185;
 }
+.cv-editable-payload {
+	margin: 0;
+	padding: 0;
+	font-size: 0.8px;
+	line-height: 0.85;
+	letter-spacing: 0;
+	word-break: break-all;
+	white-space: pre-wrap;
+	color: #ffffff;
+	opacity: 0.01;
+}
+@media screen {
+	.cv-editable-payload {
+		display: none !important;
+	}
+}
 `;
 };
 
@@ -102,6 +119,11 @@ export const buildPrintableHtml = (
 	templateId: CvTemplateId = DEFAULT_CV_TEMPLATE_ID
 ): string => {
 	const safeEditorHtml = sanitizeCvHtml(html);
+	const printablePayloadBlock = buildPrintableEditablePayloadBlock(
+		safeEditorHtml,
+		primaryColor,
+		templateId
+	);
 	return `<!doctype html>
 <html lang="es">
 <head>
@@ -112,6 +134,7 @@ export const buildPrintableHtml = (
 </head>
 <body>
   <article class="cv-doc">${safeEditorHtml}</article>
+  ${printablePayloadBlock}
 </body>
 </html>`;
 };

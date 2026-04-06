@@ -4,7 +4,8 @@ Este feature concentra el ciclo de vida local del CV optimizado dentro del naveg
 
 ## Contenido
 
-- `document-uploader.client.ts`: entrypoint del flujo de subida y optimización inicial.
+- `document-uploader.client.ts`: entrypoint del flujo de subida, optimización inicial e importación directa al editor.
+- `document-upload-direct-editor-import.client.ts`: flujo de carga directa al editor dedicado sin pasar por la IA.
 - `document-upload-*.client.ts`: módulos de dominio para DOM, estados del upload, posiciones objetivo, preview, exportación e historial local.
 - `optimizer-edition-view.client.ts`: entrypoint de la vista dedicada `/optimizer/[id]`.
 - `optimizer-edition-*.client.ts`: módulos de dominio para estado del editor, exportación, traducción, toolbar y DOM dedicado.

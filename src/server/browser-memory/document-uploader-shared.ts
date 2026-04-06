@@ -1,11 +1,13 @@
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = new Set(['.pdf', '.html', '.yaml', '.yml', '.txt']);
+const ALLOWED_DIRECT_EDITOR_EXTENSIONS = new Set(['.pdf', '.html']);
 
 export const HISTORY_MAX_ENTRIES = 20;
 
 export const PROCESS_STAGES = {
 	validating: 'Validando documento localmente',
 	uploading: 'Subiendo documento al servidor',
+	importing: 'Preparando entrada directa para el editor',
 	optimizing: 'Optimizando CV con IA',
 	rendering: 'Renderizando resultado'
 };
@@ -50,6 +52,20 @@ export const validateFileSelection = (file: File): string | null => {
 
 	if (file.size === 0) {
 		return 'El archivo esta vacio. Selecciona un documento valido.';
+	}
+
+	return null;
+};
+
+export const validateDirectEditorImportFile = (file: File): string | null => {
+	const baseValidationError = validateFileSelection(file);
+	if (baseValidationError) {
+		return baseValidationError;
+	}
+
+	const extension = file.name.includes('.') ? `.${file.name.split('.').pop()?.toLowerCase()}` : '';
+	if (!ALLOWED_DIRECT_EDITOR_EXTENSIONS.has(extension)) {
+		return 'La carga directa al editor solo acepta archivos PDF o HTML.';
 	}
 
 	return null;

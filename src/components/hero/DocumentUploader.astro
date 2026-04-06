@@ -82,6 +82,14 @@ import '../../styles/cv-templates/document-upload-preview.css';
 
 			<button
 				type="button"
+				data-upload-direct-editor
+				class="brutal-button w-full px-6 py-4 text-sm uppercase tracking-[0.08em] sm:w-auto md:px-12"
+			>
+				Abrir editor sin IA
+			</button>
+
+			<button
+				type="button"
 				data-upload-retry
 				hidden
 				class="brutal-button w-full px-6 py-4 text-sm uppercase tracking-[0.08em] sm:w-auto md:px-12"
@@ -89,6 +97,10 @@ import '../../styles/cv-templates/document-upload-preview.css';
 				Reintentar
 			</button>
 		</div>
+		<p class="mx-auto max-w-2xl text-center text-xs leading-relaxed text-(--ink-soft) sm:text-left">
+			Carga directa al editor: usa PDF con parser manual o HTML ya optimizado. Esta vía no usa
+			posiciones objetivo ni pasa por la IA.
+		</p>
 	</form>
 
 	<aside
@@ -215,6 +227,44 @@ import '../../styles/cv-templates/document-upload-preview.css';
 		</p>
 		<ul data-upload-history-list class="mt-3 space-y-2"></ul>
 	</section>
+
+	<dialog
+		data-upload-history-clear-dialog
+		aria-labelledby="upload-history-clear-title"
+		aria-describedby="upload-history-clear-description"
+		class="w-full max-w-xl bg-transparent p-0"
+	>
+		<div data-upload-history-clear-card class="mx-auto w-full">
+			<p class="font-mono text-[0.68rem] font-black uppercase tracking-[0.24em] text-(--brand-optimizer)">
+				Confirmar borrado
+			</p>
+			<h3
+				id="upload-history-clear-title"
+				class="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-(--ink-strong)"
+			>
+				¿Seguro que quieres borrar todo el historial?
+			</h3>
+			<p id="upload-history-clear-description" class="mt-3 max-w-lg text-sm leading-relaxed text-(--ink-soft)">
+				Se eliminarán todas las versiones guardadas en este navegador y no podrás recuperarlas después.
+			</p>
+			<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+				<button
+					type="button"
+					data-upload-history-clear-confirm
+					class="brutal-control min-w-44 px-4 py-3 text-xs font-black uppercase tracking-[0.08em]"
+				>
+					Sí, borrar historial
+				</button>
+				<button
+					type="button"
+					data-upload-history-clear-cancel
+					class="brutal-control min-w-44 px-4 py-3 text-xs font-black uppercase tracking-[0.08em]"
+				>
+					No, conservarlo
+				</button>
+			</div>
+		</div>
+	</dialog>
 </section>
 
 <script>

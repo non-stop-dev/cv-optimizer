@@ -1,10 +1,16 @@
 import { DEFAULT_CV_TEMPLATE_ID } from '../export-cv/cv-export';
 import {
+	createDocumentUploadDirectEditorImportWorkflow
+} from './document-upload-direct-editor-import.client';
+import {
 	createDocumentUploadExportWorkflow
 } from './document-upload-export-workflow.client';
 import {
 	createDocumentUploadHistoryWorkflow
 } from './document-upload-history.client';
+import {
+	createDocumentUploadHistoryClearConfirmationController
+} from './document-upload-history-clear-confirmation.client';
 import {
 	createDocumentUploadResultPreview
 } from './document-upload-result-preview.client';
@@ -42,6 +48,33 @@ const historyWorkflow = createDocumentUploadHistoryWorkflow({
 	historyEmpty: dom.historyEmpty,
 	historyClearButton: dom.historyClearButton
 });
+const historyClearConfirmation = createDocumentUploadHistoryClearConfirmationController({
+	dialog: dom.historyClearDialog,
+	confirmButton: dom.historyClearConfirmButton,
+	cancelButton: dom.historyClearCancelButton,
+	onConfirm: async () => {
+		dom.historyClearButton.disabled = true;
+		try {
+			await historyWorkflow.clearHistory();
+			statusWorkflow.clearLogs();
+			statusWorkflow.appendLog('Historial local limpiado', 'completado');
+			statusWorkflow.setStatus(
+				'exito',
+				'Historial limpio',
+				'Se eliminaron todas las versiones guardadas.'
+			);
+		} catch (error) {
+			console.error('No se pudo limpiar el historial local.', error);
+			statusWorkflow.setStatus(
+				'error',
+				'No se pudo limpiar el historial',
+				'Intenta nuevamente en unos segundos.'
+			);
+		} finally {
+			dom.historyClearButton.disabled = historyWorkflow.getEntries().length === 0;
+		}
+	}
+});
 const resultPreview = createDocumentUploadResultPreview({
 	resultContainer: dom.resultContainer,
 	resultPreview: dom.resultPreview,
@@ -54,15 +87,36 @@ const exportWorkflow = createDocumentUploadExportWorkflow({
 	getCurrentDocumentBaseName: () => currentDocumentBaseName,
 	setStatus: statusWorkflow.setStatus
 });
+const directEditorImportWorkflow = createDocumentUploadDirectEditorImportWorkflow({
+	getPrimaryColor: () => dom.cvPrimaryColorPicker.value,
+	showResult: resultPreview.showResult,
+	saveCurrentVersion: historyWorkflow.saveCurrentVersion,
+	setLoadingState: (isLoading) => {
+		setLoadingState(isLoading ? 'direct-import' : 'idle');
+	},
+	setStatus: statusWorkflow.setStatus,
+	clearLogs: statusWorkflow.clearLogs,
+	setRetryAvailability: statusWorkflow.setRetryAvailability,
+	appendLog: statusWorkflow.appendLog,
+	startStage: statusWorkflow.startStage,
+	completeStage: statusWorkflow.completeStage,
+	failActiveStage: statusWorkflow.failActiveStage
+});
 
 let lastSelectedFile: File | null = null;
 let currentDocumentBaseName = 'cv-optimizado';
 
-const setLoadingState = (isLoading: boolean): void => {
+type UploadLoadingMode = 'idle' | 'optimizing' | 'direct-import';
+
+const setLoadingState = (mode: UploadLoadingMode): void => {
+	const isLoading = mode !== 'idle';
 	dom.input.disabled = isLoading;
 	dom.submitButton.disabled = isLoading;
+	dom.editorImportButton.disabled = isLoading;
 	dom.retryButton.disabled = isLoading;
-	dom.submitButton.textContent = isLoading ? 'Generando...' : 'Generar CV optimizado';
+	dom.submitButton.textContent = mode === 'optimizing' ? 'Generando...' : 'Generar CV optimizado';
+	dom.editorImportButton.textContent =
+		mode === 'direct-import' ? 'Abriendo editor...' : 'Abrir editor sin IA';
 	targetPositionsController.setBusy(isLoading);
 };
 
@@ -108,7 +162,7 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 	targetPositionsController.flushPendingInput();
 	const requestTargetPositions = targetPositionsController.getValues();
 
-	setLoadingState(true);
+	setLoadingState('optimizing');
 	statusWorkflow.setStatus(
 		'proceso',
 		'Procesando CV',
@@ -237,7 +291,7 @@ const uploadDocument = async (file: File | null | undefined): Promise<void> => {
 			statusWorkflow.setRetryAvailability(true);
 		}
 	} finally {
-		setLoadingState(false);
+		setLoadingState('idle');
 	}
 };
 
@@ -302,6 +356,26 @@ dom.form.addEventListener('submit', async (event) => {
 	await uploadDocument(selectedFile);
 });
 
+dom.editorImportButton.addEventListener('click', async () => {
+	if (dom.editorImportButton.disabled) {
+		return;
+	}
+
+	const selectedFile = dom.input.files?.[0] ?? lastSelectedFile;
+	if (selectedFile instanceof File) {
+		lastSelectedFile = selectedFile;
+		currentDocumentBaseName =
+			selectedFile.name.replace(/\.[^.]+$/, '') || 'cv-optimizado';
+		dom.fileNameLabel.textContent = selectedFile.name;
+	}
+
+	const createdHistoryId =
+		await directEditorImportWorkflow.importDocumentToEditor(selectedFile);
+	if (createdHistoryId) {
+		window.location.assign(toOptimizerResultPath(createdHistoryId));
+	}
+});
+
 dom.retryButton.addEventListener('click', async () => {
 	if (dom.submitButton.disabled) {
 		return;
@@ -349,31 +423,12 @@ dom.historyList.addEventListener('click', (event) => {
 	window.location.assign(toOptimizerResultPath(selectedEntry.id));
 });
 
-dom.historyClearButton.addEventListener('click', async () => {
+dom.historyClearButton.addEventListener('click', () => {
 	if (historyWorkflow.getEntries().length === 0 || dom.historyClearButton.disabled) {
 		return;
 	}
 
-	dom.historyClearButton.disabled = true;
-	try {
-		await historyWorkflow.clearHistory();
-		statusWorkflow.clearLogs();
-		statusWorkflow.appendLog('Historial local limpiado', 'completado');
-		statusWorkflow.setStatus(
-			'exito',
-			'Historial limpio',
-			'Se eliminaron todas las versiones guardadas.'
-		);
-	} catch (error) {
-		console.error('No se pudo limpiar el historial local.', error);
-		statusWorkflow.setStatus(
-			'error',
-			'No se pudo limpiar el historial',
-			'Intenta nuevamente en unos segundos.'
-		);
-	} finally {
-		dom.historyClearButton.disabled = historyWorkflow.getEntries().length === 0;
-	}
+	historyClearConfirmation.open();
 });
 
 targetPositionsController.setValues([]);

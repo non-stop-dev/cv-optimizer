@@ -106,7 +106,9 @@ export const buildPdfFixture = (pages: string[]): Uint8Array => {
 };
 
 export const createPdfFileFixture = (pages: string[], fileName = 'fixture.pdf'): File => {
-	return new File([buildPdfFixture(pages)], fileName, {
+	const fileBytes = Uint8Array.from(buildPdfFixture(pages));
+
+	return new File([fileBytes.buffer], fileName, {
 		type: 'application/pdf'
 	});
 };

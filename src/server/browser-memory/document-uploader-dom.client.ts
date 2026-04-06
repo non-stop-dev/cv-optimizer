@@ -3,6 +3,7 @@ export interface DocumentUploaderDom {
 	input: HTMLInputElement;
 	fileNameLabel: HTMLElement;
 	submitButton: HTMLButtonElement;
+	editorImportButton: HTMLButtonElement;
 	retryButton: HTMLButtonElement;
 	statusContainer: HTMLElement;
 	statusTitle: HTMLElement;
@@ -14,6 +15,9 @@ export interface DocumentUploaderDom {
 	historyList: HTMLElement;
 	historyEmpty: HTMLElement;
 	historyClearButton: HTMLButtonElement;
+	historyClearDialog: HTMLDialogElement;
+	historyClearConfirmButton: HTMLButtonElement;
+	historyClearCancelButton: HTMLButtonElement;
 	cvPrimaryColorPicker: HTMLInputElement;
 	exportHtmlButton: HTMLButtonElement;
 	exportTxtButton: HTMLButtonElement;
@@ -33,6 +37,7 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 	const input = document.querySelector('[data-upload-input]');
 	const fileNameLabel = document.querySelector('[data-upload-file-name]');
 	const submitButton = document.querySelector('[data-upload-submit]');
+	const editorImportButton = document.querySelector('[data-upload-direct-editor]');
 	const retryButton = document.querySelector('[data-upload-retry]');
 	const statusContainer = document.querySelector('[data-upload-status]');
 	const statusTitle = document.querySelector('[data-upload-status-title]');
@@ -44,6 +49,9 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 	const historyList = document.querySelector('[data-upload-history-list]');
 	const historyEmpty = document.querySelector('[data-upload-history-empty]');
 	const historyClearButton = document.querySelector('[data-upload-history-clear]');
+	const historyClearDialog = document.querySelector('[data-upload-history-clear-dialog]');
+	const historyClearConfirmButton = document.querySelector('[data-upload-history-clear-confirm]');
+	const historyClearCancelButton = document.querySelector('[data-upload-history-clear-cancel]');
 	const cvPrimaryColorPicker = document.querySelector('[data-cv-primary-color]');
 	const exportHtmlButton = document.querySelector('[data-cv-export-html]');
 	const exportTxtButton = document.querySelector('[data-cv-export-txt]');
@@ -58,6 +66,7 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 		!(input instanceof HTMLInputElement) ||
 		!(fileNameLabel instanceof HTMLElement) ||
 		!(submitButton instanceof HTMLButtonElement) ||
+		!(editorImportButton instanceof HTMLButtonElement) ||
 		!(retryButton instanceof HTMLButtonElement) ||
 		!(statusContainer instanceof HTMLElement) ||
 		!(statusTitle instanceof HTMLElement) ||
@@ -69,6 +78,9 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 		!(historyList instanceof HTMLElement) ||
 		!(historyEmpty instanceof HTMLElement) ||
 		!(historyClearButton instanceof HTMLButtonElement) ||
+		!(historyClearDialog instanceof HTMLDialogElement) ||
+		!(historyClearConfirmButton instanceof HTMLButtonElement) ||
+		!(historyClearCancelButton instanceof HTMLButtonElement) ||
 		!(cvPrimaryColorPicker instanceof HTMLInputElement) ||
 		!(exportHtmlButton instanceof HTMLButtonElement) ||
 		!(exportTxtButton instanceof HTMLButtonElement) ||
@@ -86,6 +98,7 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 		input,
 		fileNameLabel,
 		submitButton,
+		editorImportButton,
 		retryButton,
 		statusContainer,
 		statusTitle,
@@ -97,6 +110,9 @@ export const getDocumentUploaderDom = (): DocumentUploaderDom => {
 		historyList,
 		historyEmpty,
 		historyClearButton,
+		historyClearDialog,
+		historyClearConfirmButton,
+		historyClearCancelButton,
 		cvPrimaryColorPicker,
 		exportHtmlButton,
 		exportTxtButton,
