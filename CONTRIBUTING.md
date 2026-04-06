@@ -34,6 +34,9 @@ Eso corre:
 
 ## Reglas del proyecto
 
+- El stack de estilos preferido es `Tailwind CSS v4`.
+- La organización del código debe seguir `Screaming Architecture`: dominios y casos de uso primero, no carpetas genéricas por capa técnica.
+- La dirección visual del producto debe mantenerse en estilo `neobrutalism`; evita introducir UI genérica o visualmente neutra si rompe esa identidad.
 - Mantén los archivos por debajo de `500` líneas.
 - Si tocas una feature folder, actualiza su `README.md` cuando cambie la estructura o el flujo.
 - Mantén el HTML semántico y la sanitización como fuente única de verdad.
