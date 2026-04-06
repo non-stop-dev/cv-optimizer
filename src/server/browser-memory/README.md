@@ -13,8 +13,8 @@ Este feature concentra el ciclo de vida local del CV optimizado dentro del naveg
 
 ## Entry Points
 
-- [`document-uploader.client.ts`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/server/browser-memory/document-uploader.client.ts)
-- [`optimizer-edition-view.client.ts`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/server/browser-memory/optimizer-edition-view.client.ts)
+- [`document-uploader.client.ts`](./document-uploader.client.ts)
+- [`optimizer-edition-view.client.ts`](./optimizer-edition-view.client.ts)
 
 ## Data Flow
 

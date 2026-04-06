@@ -1,81 +1,112 @@
----
-const steps = [
-	{
-		label: '01',
-		title: 'Sube tu documento',
-		description:
-			'Arrastras tu CV actual o un borrador incompleto. La plataforma extrae el contenido útil y limpia el ruido.'
-	},
-	{
-		label: '02',
-		title: 'La IA reescribe con criterio',
-		description:
-			'Convierte frases débiles en logros claros, reordena secciones y deja el texto listo para escanear.'
-	},
-	{
-		label: '03',
-		title: 'Ajusta el tono y el estilo',
-		description:
-			'Editas encima de la base optimizada, cambias plantilla y mantienes el contenido sin volver al punto cero.'
-	},
-	{
-		label: '04',
-		title: 'Exporta y sigue postulando',
-		description:
-			'Descargas una versión limpia para ATS y una versión visual lista para enviar a reclutadores.'
-	}
-];
----
-
 <section
 	id="workflow"
 	class="landing-shell relative scroll-mt-[calc(var(--nav-height)+1.5rem)] px-6 py-14 md:px-10 lg:py-20"
 >
 	<div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-		<div class="max-w-2xl">
+		<div class="max-w-3xl">
 			<p class="brutal-chip bg-(--note-mint) px-4 py-2">
 				Workflow
 			</p>
 			<h2 class="mt-6 text-balance text-4xl font-black uppercase leading-[0.96] text-(--ink-strong) sm:text-5xl">
-				Cuando te atascas escribiendo, aquí es donde el flujo empieza a jugar a tu favor.
+				Aquí no hace falta imaginar el flujo. Puedes verlo de principio a fin.
 			</h2>
 		</div>
 
 		<p class="max-w-md text-base leading-relaxed text-(--ink-soft)">
-			No es solo una mejora estética. Es un recorrido pensado para transformar un archivo confuso
-			en una herramienta lista para moverse entre ofertas.
+			El video enseña la secuencia completa: subir el archivo, optimizarlo, editarlo y salir con una
+			versión lista para seguir postulando.
 		</p>
 	</div>
 
-	<ol
-		class="timeline-sheen mt-10 grid overflow-hidden rounded-4xl border-2 border-(--line) bg-white shadow-[10px_10px_0_var(--shadow)] lg:grid-cols-4"
-	>
-		{steps.map((step, index) => (
-			<li
-				class:list={[
-					'relative flex min-h-72 flex-col justify-between bg-white px-6 py-6 sm:px-7 sm:py-7',
-					index > 0 ? 'border-t-2 border-(--line) lg:border-l-2 lg:border-t-0' : ''
-				]}
-			>
-				<div>
-					<p class="font-mono text-sm font-black uppercase tracking-[0.28em] text-(--accent-red)">
-						{step.label}
+	<div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(18rem,0.82fr)]">
+		<article class="brutal-paper px-4 py-4 sm:px-5 sm:py-5">
+			<div class="relative z-10">
+				<div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-(--line) pb-4">
+					<div>
+						<p class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--accent-red)">
+							Demo completa
+						</p>
+						<h3 class="mt-2 text-2xl font-black uppercase leading-none text-(--ink-strong) sm:text-3xl">
+							Del borrador al CV optimizado
+						</h3>
+					</div>
+
+					<p class="brutal-chip bg-white px-4 py-2">
+						Inicio → edición → export
 					</p>
-					<h3 class="mt-4 max-w-xs text-2xl font-black uppercase leading-tight text-(--ink-strong)">
-						{step.title}
-					</h3>
 				</div>
-				<p class="max-w-sm text-base leading-relaxed text-(--ink-soft)">
-					{step.description}
+
+				<div class="mt-5 border-2 border-(--line) bg-white shadow-[8px_8px_0_var(--shadow)]">
+					<video
+						class="block aspect-video w-full bg-black object-cover"
+						controls
+						playsinline
+						preload="metadata"
+					>
+						<source src="/cv-optimizer-preview.mp4" type="video/mp4" />
+						Tu navegador no puede reproducir este video.
+					</video>
+				</div>
+
+				<div class="mt-4 flex items-start gap-3 border-2 border-(--line) bg-(--note-yellow) px-4 py-3 shadow-[6px_6px_0_var(--shadow)]">
+					<span
+						class="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-(--line) bg-white text-sm font-black text-(--accent-red)"
+						aria-hidden="true"
+					>
+						!
+					</span>
+					<p class="text-sm leading-relaxed text-(--ink-strong)">
+						Si no escuchas audio, revisa el volumen del reproductor y que la pestaña no esté silenciada.
+					</p>
+				</div>
+			</div>
+		</article>
+
+		<aside class="grid gap-4">
+			<div class="brutal-card bg-white px-5 py-5">
+				<p class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--ink-soft)">
+					Qué estás viendo
 				</p>
-			</li>
-		))}
-	</ol>
+				<p class="mt-3 text-lg font-black uppercase leading-tight text-(--ink-strong)">
+					El recorrido real dentro del producto
+				</p>
+				<p class="mt-3 text-base leading-relaxed text-(--ink-soft)">
+					Sin mockups ni promesas abstractas. Es el flujo completo funcionando sobre la interfaz real.
+				</p>
+			</div>
+
+			<div class="brutal-card bg-(--paper-muted) px-5 py-5">
+				<p class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--ink-soft)">
+					Lo importante
+				</p>
+				<ul class="mt-4 space-y-3 text-sm leading-relaxed text-(--ink-soft)">
+					<li class="flex gap-3">
+						<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--note-yellow) text-[0.68rem] font-black text-(--ink-strong)">
+							01
+						</span>
+						Ves cómo entra el documento y cómo sale convertido en una base editable.
+					</li>
+					<li class="flex gap-3">
+						<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--note-mint) text-[0.68rem] font-black text-(--ink-strong)">
+							02
+						</span>
+						Se entiende el tiempo real del proceso mejor que con una lista de pasos.
+					</li>
+					<li class="flex gap-3">
+						<span class="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center border-2 border-(--line) bg-(--accent-red) text-[0.68rem] font-black text-white">
+							03
+						</span>
+						Puedes saltar al optimizer justo después de ver el resultado final.
+					</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
 
 	<div class="mt-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 		<p class="max-w-2xl text-lg leading-relaxed text-(--ink-soft)">
-			El punto no es “tener un CV bonito”. El punto es dejar de gastar energía en la parte más
-			lenta del proceso y usarla donde sí importa: adaptar tu candidatura.
+			El punto no es explicar el flujo con más palabras. El punto es que puedas comprobar en menos de
+			un minuto cómo se usa y qué sale al otro lado.
 		</p>
 
 		<a href="/optimizer" class="brutal-button brutal-button--accent self-start lg:self-auto">

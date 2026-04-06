@@ -11,10 +11,10 @@ Este folder concentra las plantillas visuales del CV para mantener sincronizados
 
 ## Entry Points
 
-- [`cv-template-options.ts`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/styles/cv-templates/cv-template-options.ts): SSOT para ids y labels de plantillas.
-- [`cv-template-css.ts`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/styles/cv-templates/cv-template-css.ts): genera el CSS de cada variante para exportación.
-- [`cv-preview-templates.css`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/styles/cv-templates/cv-preview-templates.css): aplica la misma familia visual al preview editable.
-- [`document-upload-preview.css`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/styles/cv-templates/document-upload-preview.css): estiliza el workspace de upload, chips, logs y preview previo al editor dedicado.
+- [`cv-template-options.ts`](./cv-template-options.ts): SSOT para ids y labels de plantillas.
+- [`cv-template-css.ts`](./cv-template-css.ts): genera el CSS de cada variante para exportación.
+- [`cv-preview-templates.css`](./cv-preview-templates.css): aplica la misma familia visual al preview editable.
+- [`document-upload-preview.css`](./document-upload-preview.css): estiliza el workspace de upload, chips, logs y preview previo al editor dedicado.
 
 ## Data Flow
 

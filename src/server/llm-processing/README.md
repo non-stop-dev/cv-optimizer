@@ -12,7 +12,7 @@ This folder contains the server-side AI integration for CV optimization and HTML
 - [`ai-provider-openai-compatible-client.ts`](./ai-provider-openai-compatible-client.ts): runs the shared OpenAI-compatible `chat.completions` requests.
 - [`ai-provider-openai-compatible-request.ts`](./ai-provider-openai-compatible-request.ts): builds shared prompts, messages, PDF file parts, and optional structured output settings.
 - [`ai-provider-gemini-native-pdf.ts`](./ai-provider-gemini-native-pdf.ts): keeps Gemini’s native Files API PDF flow behind the generic facade.
-- [`pdf-processing/README.md`](/Users/leonardoleon/developer-stuff/cv-optimizer/src/server/llm-processing/pdf-processing/README.md): documents native PDF processing, extraction quality gates, and fallback rules.
+- [`pdf-processing/README.md`](./pdf-processing/README.md): documents native PDF processing, extraction quality gates, and fallback rules.
 - [`cv-optimizer-system-prompt.ts`](./cv-optimizer-system-prompt.ts): provider-neutral system prompt persona for CV optimization.
 
 ## Provider switching

@@ -1,7 +1,7 @@
 # PROJECT_SPEC: CV Optimizer (Professional Edition)
 
 ## 1. Vision & Architecture
-This project follows a **Screaming Architecture** pattern. The folder structure itself communicates the application's domain and intent rather than just the framework's technical layers. Selected frameworks are Astro and Tailwind CSS v4
+This project follows a **Screaming Architecture** pattern. The folder structure itself communicates the application's domain and intent rather than just the framework's technical layers. Selected frameworks are Astro and Tailwind CSS v4. The intended visual language is **neobrutalism**. The repository is licensed under **Apache-2.0**.
 
 ### Core Architectural Principle: Content/Style Decoupling
 The AI **must never** generate CSS. Its sole responsibility is generating **Semantic HTML** (Content). The application then injects pre-defined, hardcoded CSS (Styles) based on user selection.
@@ -49,7 +49,7 @@ The `src/server/` directory is organized by feature and domain:
 * **Theming:** Templates are interchangeable. Changing a template simply swaps the CSS link/object without re-triggering the AI processing.
 
 ### B. Export Engines
-* **PDF:** Use `window.print()` for the manual "Ctrl+P" route. For automated downloads, use **Puppeteer** (Node.js) on the server-side to ensure high-fidelity rendering of CSS templates.
+* **PDF:** The current implementation uses `window.print()` / browser print preview. If an automated server-side PDF export is added later, it must preserve the same visual fidelity and template behavior as the browser output.
 * **TXT:** A specific parser in `export-cv` must strip all HTML tags and CSS to provide a "clean-text" version for platforms that require manual copy-pasting.
 * **HTML:** Export a standalone file with the hardcoded CSS inlined or in a `<style>` block.
 
@@ -60,12 +60,13 @@ The `src/server/` directory is organized by feature and domain:
 ## 4. Security & Privacy Rules (Review)
 * **Input Sanitization:** Before sending data to the AI or saving to IndexedDB, all inputs (PDF, HTML, YAML, TXT) must be stripped of script tags or malicious payloads.
 * **UI Copy:** Maintain "Security through Obscurity".
-    * *Rule:* Do not mention "IndexedDB" or "Puppeteer" in the UI. 
+    * *Rule:* Do not mention implementation details such as "IndexedDB" or internal PDF rendering tooling in the UI.
     * *Messaging:* "Your data is stored locally in this browser. If you switch devices, you must start over."
 
 ## 5. Instructions for AI Coding Assistants
 * **Component Logic:** When creating the editor, implement a "change tracker" that syncs with `src/server/browser-memory`.
 * **Style Logic:** Ensure that switching a template in `src/styles/cv-templates` does not reset the edited content in the state.
+* **Visual Direction:** Preserve the repo's neobrutalist UI direction. Avoid replacing it with generic SaaS styling or neutral component-library aesthetics.
 * **Export Logic:** The `.txt` export must be strictly plain text, optimized for ATS parsers (no markdown symbols like `**` or `#`).
 
 ## 6. Mandatory Script Modularization Rule
