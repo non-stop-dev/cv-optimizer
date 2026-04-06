@@ -48,12 +48,12 @@ const steps = [
 	</div>
 
 	<ol
-		class="timeline-sheen mt-10 grid overflow-hidden rounded-[2rem] border-2 border-(--line) bg-white shadow-[10px_10px_0_var(--shadow)] lg:grid-cols-4"
+		class="timeline-sheen mt-10 grid overflow-hidden rounded-4xl border-2 border-(--line) bg-white shadow-[10px_10px_0_var(--shadow)] lg:grid-cols-4"
 	>
 		{steps.map((step, index) => (
 			<li
 				class:list={[
-					'relative flex min-h-[18rem] flex-col justify-between bg-white px-6 py-6 sm:px-7 sm:py-7',
+					'relative flex min-h-72 flex-col justify-between bg-white px-6 py-6 sm:px-7 sm:py-7',
 					index > 0 ? 'border-t-2 border-(--line) lg:border-l-2 lg:border-t-0' : ''
 				]}
 			>
