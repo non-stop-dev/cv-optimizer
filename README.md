@@ -2,6 +2,8 @@
 
 Aplicación local-first para optimizar y editar CVs con `OpenAI`, `Gemini` o `OpenRouter`.
 
+[![Ver demo de CV Optimizer](./public/cv-optimizer-preview-poster.png)](./public/cv-optimizer-preview.mp4)
+
 La idea del proyecto es simple:
 
 - clonas o descargas el repo
