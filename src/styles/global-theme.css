@@ -1,0 +1,103 @@
+:root {
+	--brand-cv: #ff5a36;
+	--brand-optimizer: #00a37a;
+	--ink-strong: #111111;
+	--ink-soft: #4c4c4c;
+	--paper: #fffdf8;
+	--paper-muted: #f3ecde;
+	--paper-rule: rgba(52, 96, 196, 0.16);
+	--line: #151515;
+	--shadow: #121212;
+	--note-yellow: #ffe173;
+	--note-blue: #91c8ff;
+	--note-mint: #9ff3cf;
+	--accent-red: #ff5a36;
+	--nav-height: 6.75rem;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+	color: var(--ink-strong);
+	background:
+		radial-gradient(circle at top left, rgba(255, 90, 54, 0.1), transparent 22rem),
+		radial-gradient(circle at top right, rgba(0, 163, 122, 0.1), transparent 18rem),
+		#f2ebdc;
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+	letter-spacing: -0.04em;
+}
+
+a,
+button,
+summary {
+	touch-action: manipulation;
+}
+
+.landing-page {
+	position: relative;
+	isolation: isolate;
+	overflow: clip;
+	background:
+		linear-gradient(rgba(17, 17, 17, 0.075) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(17, 17, 17, 0.075) 1px, transparent 1px),
+		linear-gradient(180deg, #f8f3e9 0%, #f2ebdc 100%);
+	background-size: 2rem 2rem, 2rem 2rem, 100% 100%;
+}
+
+.landing-page::before,
+.landing-page::after {
+	content: "";
+	position: absolute;
+	inset: auto;
+	border-radius: 999px;
+	filter: blur(8px);
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.landing-page::before {
+	top: 5rem;
+	left: -4rem;
+	width: 16rem;
+	height: 16rem;
+	background: rgba(255, 90, 54, 0.12);
+}
+
+.landing-page::after {
+	right: -5rem;
+	bottom: 10rem;
+	width: 18rem;
+	height: 18rem;
+	background: rgba(0, 163, 122, 0.14);
+}
+
+.landing-shell {
+	width: min(92rem, calc(100vw - 1.5rem));
+	margin-inline: auto;
+}
+
+details summary {
+	list-style: none;
+}
+
+details summary::-webkit-details-marker {
+	display: none;
+}

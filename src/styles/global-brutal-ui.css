@@ -1,0 +1,199 @@
+.brutal-paper {
+	position: relative;
+	overflow: hidden;
+	border: 2px solid var(--line);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--paper) 100%);
+	box-shadow: 10px 10px 0 var(--shadow);
+}
+
+.brutal-paper::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(
+			90deg,
+			transparent 0 2.25rem,
+			rgba(255, 90, 54, 0.18) 2.25rem 2.35rem,
+			transparent 2.35rem
+		),
+		repeating-linear-gradient(
+			180deg,
+			transparent 0 1.9rem,
+			var(--paper-rule) 1.9rem 1.96rem
+		);
+	opacity: 0.78;
+	pointer-events: none;
+}
+
+.brutal-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid var(--line);
+	background: var(--note-yellow);
+	box-shadow: 4px 4px 0 var(--shadow);
+	font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+	font-size: 0.74rem;
+	font-weight: 800;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+}
+
+.brutal-note {
+	position: relative;
+	border: 2px solid var(--line);
+	box-shadow: 8px 8px 0 rgba(18, 18, 18, 0.95);
+}
+
+.brutal-note::before {
+	content: "";
+	position: absolute;
+	top: -0.75rem;
+	left: 1rem;
+	width: 4rem;
+	height: 1.1rem;
+	border: 2px solid var(--line);
+	background: rgba(255, 255, 255, 0.62);
+	transform: rotate(-7deg);
+}
+
+.brutal-panel {
+	position: relative;
+	overflow: hidden;
+	border: 2px solid var(--line);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--paper) 100%);
+	box-shadow: 10px 10px 0 var(--shadow);
+}
+
+.brutal-card {
+	border: 2px solid var(--line);
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 6px 6px 0 rgba(18, 18, 18, 0.94);
+}
+
+.brutal-control {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.65rem;
+	border: 2px solid var(--line);
+	background: #ffffff;
+	box-shadow: 4px 4px 0 rgba(18, 18, 18, 0.94);
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease,
+		background-color 180ms ease,
+		color 180ms ease;
+}
+
+.brutal-control:hover,
+.brutal-control:focus-visible {
+	transform: translate(-2px, -2px);
+	box-shadow: 7px 7px 0 rgba(18, 18, 18, 0.94);
+}
+
+.brutal-control:focus-visible {
+	outline: 3px solid rgba(0, 163, 122, 0.32);
+	outline-offset: 3px;
+}
+
+.brutal-field {
+	width: 100%;
+	border: 2px solid var(--line);
+	background: #ffffff;
+	box-shadow: 4px 4px 0 rgba(18, 18, 18, 0.88);
+	color: var(--ink-strong);
+}
+
+.brutal-field:focus-visible {
+	outline: 3px solid rgba(0, 163, 122, 0.32);
+	outline-offset: 3px;
+}
+
+.brutal-tooltip {
+	border: 2px solid var(--line);
+	background: #fffdf8;
+	box-shadow: 6px 6px 0 rgba(18, 18, 18, 0.94);
+}
+
+.brutal-warning {
+	position: relative;
+	overflow: hidden;
+	padding: 1.45rem 1rem 1rem 1rem;
+	border: 3px solid var(--line);
+	background:
+		linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 48%),
+		linear-gradient(135deg, #ff7a4f 0%, #ff5a36 52%, #ff8d5a 100%);
+	box-shadow: 10px 10px 0 rgba(18, 18, 18, 0.96);
+	color: #fffdf8;
+	transform: rotate(-4deg);
+}
+
+.brutal-warning::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 0.75rem;
+	border-bottom: 3px solid var(--line);
+	background: repeating-linear-gradient(
+		135deg,
+		var(--line) 0 0.85rem,
+		var(--note-yellow) 0.85rem 1.7rem
+	);
+}
+
+.warning-icon {
+	display: inline-flex;
+	height: 2.4rem;
+	width: 2.4rem;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	border: 3px solid var(--line);
+	background: var(--paper);
+	box-shadow: 4px 4px 0 rgba(18, 18, 18, 0.92);
+	color: var(--accent-red);
+}
+
+.brutal-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.65rem;
+	padding: 0.9rem 1.35rem;
+	border: 2px solid var(--line);
+	background: #ffffff;
+	box-shadow: 6px 6px 0 var(--shadow);
+	font-family: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 800;
+	letter-spacing: 0.02em;
+	color: var(--ink-strong);
+	text-decoration: none;
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease,
+		background-color 180ms ease,
+		color 180ms ease;
+}
+
+.brutal-button:hover,
+.brutal-button:focus-visible {
+	transform: translate(-2px, -2px);
+	box-shadow: 9px 9px 0 var(--shadow);
+}
+
+.brutal-button:focus-visible {
+	outline: 3px solid rgba(0, 163, 122, 0.35);
+	outline-offset: 3px;
+}
+
+.brutal-button--accent {
+	background: var(--accent-red);
+	color: #ffffff;
+}
+
+.brutal-button--mint {
+	background: var(--note-mint);
+}
