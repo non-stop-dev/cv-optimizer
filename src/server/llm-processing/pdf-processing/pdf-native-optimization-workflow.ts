@@ -21,7 +21,7 @@ interface OptimizePdfWithNativeFallbackParams {
 const PDF_NATIVE_SUCCESS_NOTICE =
 	'PDF procesado con soporte nativo del proveedor.';
 const PDF_TEXT_FALLBACK_NOTICE =
-	'El proveedor no pudo procesar el PDF de forma nativa. Se uso una extraccion validada de texto como fallback.';
+	'El proveedor no pudo procesar el PDF de forma nativa. Se uso una extracción validada de texto como fallback.';
 
 const toPdfTextExtractionFailure = (cause: unknown): AiProviderRequestError => {
 	return new AiProviderRequestError(

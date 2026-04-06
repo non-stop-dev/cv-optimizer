@@ -151,6 +151,65 @@ summary {
 	transform: rotate(-7deg);
 }
 
+.brutal-panel {
+	position: relative;
+	overflow: hidden;
+	border: 2px solid var(--line);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--paper) 100%);
+	box-shadow: 10px 10px 0 var(--shadow);
+}
+
+.brutal-card {
+	border: 2px solid var(--line);
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 6px 6px 0 rgba(18, 18, 18, 0.94);
+}
+
+.brutal-control {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.65rem;
+	border: 2px solid var(--line);
+	background: #ffffff;
+	box-shadow: 4px 4px 0 rgba(18, 18, 18, 0.94);
+	transition:
+		transform 180ms ease,
+		box-shadow 180ms ease,
+		background-color 180ms ease,
+		color 180ms ease;
+}
+
+.brutal-control:hover,
+.brutal-control:focus-visible {
+	transform: translate(-2px, -2px);
+	box-shadow: 7px 7px 0 rgba(18, 18, 18, 0.94);
+}
+
+.brutal-control:focus-visible {
+	outline: 3px solid rgba(0, 163, 122, 0.32);
+	outline-offset: 3px;
+}
+
+.brutal-field {
+	width: 100%;
+	border: 2px solid var(--line);
+	background: #ffffff;
+	box-shadow: 4px 4px 0 rgba(18, 18, 18, 0.88);
+	color: var(--ink-strong);
+}
+
+.brutal-field:focus-visible {
+	outline: 3px solid rgba(0, 163, 122, 0.32);
+	outline-offset: 3px;
+}
+
+.brutal-tooltip {
+	border: 2px solid var(--line);
+	background: #fffdf8;
+	box-shadow: 6px 6px 0 rgba(18, 18, 18, 0.94);
+}
+
 .brutal-warning {
 	position: relative;
 	overflow: hidden;
@@ -471,7 +530,8 @@ details summary::-webkit-details-marker {
 		transform: none !important;
 	}
 
-	.brutal-button {
+	.brutal-button,
+	.brutal-control {
 		transition: none;
 	}
 }

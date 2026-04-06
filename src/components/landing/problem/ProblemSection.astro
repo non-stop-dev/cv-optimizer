@@ -69,68 +69,154 @@
 				</div>
 			</aside>
 
-			<div class="brutal-paper px-6 py-7 sm:px-8 sm:py-8">
-				<div class="relative z-10">
-					<div class="border-b-2 border-(--line) pb-5">
-						<p class="font-mono text-[0.72rem] font-bold uppercase tracking-[0.24em] text-(--ink-soft)">
-							Radiografía Del Borrador
-						</p>
-						<h3 class="mt-3 text-3xl font-black uppercase leading-none text-(--ink-strong)">
-							Lo que te frena al hacerlo solo
-						</h3>
-					</div>
-
-					<div class="mt-6 divide-y-2 divide-(--line)">
-						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
-						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)">
-							Intento 01
-						</p>
-						<div>
-							<p class="text-xl font-black uppercase text-(--ink-strong)">
-								El ATS no interpreta la maqueta
+				<div class="brutal-paper problem-paper px-6 py-7 sm:px-8 sm:py-8">
+					<div class="relative z-10">
+						<div class="problem-paper__header border-b-2 border-(--line)">
+							<p class="font-mono text-[0.72rem] font-bold uppercase tracking-[0.24em] text-(--ink-soft)">
+								Radiografía Del Borrador
 							</p>
-							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
-								Columnas, bloques decorativos y jerarquías visuales bonitas para humanos terminan
-								rompiendo el orden lógico que el parser necesita para leer experiencia, skills y
-								fechas correctamente.
-							</p>
+							<h3 class="problem-paper__headline mt-3 font-black uppercase text-(--ink-strong)">
+								Lo que te frena al hacerlo solo
+							</h3>
 						</div>
-					</div>
 
-						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
-						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)">
-							Intento 02
-						</p>
-						<div>
-							<p class="text-xl font-black uppercase text-(--ink-strong)">
-								Faltan keywords & sobra ambigüedad
-							</p>
-							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
-								Si el CV no nombra herramientas, responsabilidades y términos del rol con claridad,
-								no suma puntos en filtros automáticos. Y si además describe logros como tareas, el
-								valor real queda escondido.
-							</p>
-						</div>
-					</div>
+						<div class="problem-paper__list divide-y-2 divide-(--line)">
+							<div class="problem-paper__row">
+								<p
+									class="problem-paper__eyebrow font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)"
+								>
+									Intento 01
+								</p>
+								<div class="problem-paper__content">
+									<p class="problem-paper__title text-xl font-black uppercase text-(--ink-strong)">
+										El ATS no interpreta la maqueta
+									</p>
+									<p class="problem-paper__copy text-base text-(--ink-soft)">
+										Columnas, bloques decorativos y jerarquías visuales bonitas para humanos terminan
+										rompiendo el orden lógico que el parser necesita para leer experiencia, skills y
+										fechas correctamente.
+									</p>
+								</div>
+							</div>
 
-						<div class="grid gap-4 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-start">
-						<p class="font-mono text-sm font-black uppercase tracking-[0.24em] text-(--brand-optimizer)">
-							Salida
-						</p>
-						<div>
-							<p class="text-xl font-black uppercase text-(--ink-strong)">
-								Pasa filtros sin perder fuerza humana
-							</p>
-							<p class="mt-2 text-base leading-relaxed text-(--ink-soft)">
-								CV Optimizer ordena el contenido para que el ATS lo entienda, refuerza el keywording
-								y convierte experiencia difusa en logros que se explican solos cuando por fin lo lee
-								una persona.
-							</p>
+							<div class="problem-paper__row">
+								<p
+									class="problem-paper__eyebrow font-mono text-sm font-black uppercase tracking-[0.24em] text-(--accent-red)"
+								>
+									Intento 02
+								</p>
+								<div class="problem-paper__content">
+									<p class="problem-paper__title text-xl font-black uppercase text-(--ink-strong)">
+										Faltan keywords & sobra ambigüedad
+									</p>
+									<p class="problem-paper__copy text-base text-(--ink-soft)">
+										Si el CV no nombra herramientas, responsabilidades y términos del rol con claridad,
+										no suma puntos en filtros automáticos. Y si además describe logros como tareas, el
+										valor real queda escondido.
+									</p>
+								</div>
+							</div>
+
+							<div class="problem-paper__row">
+								<p
+									class="problem-paper__eyebrow font-mono text-sm font-black uppercase tracking-[0.24em] text-(--brand-optimizer)"
+								>
+									Salida
+								</p>
+								<div class="problem-paper__content">
+									<p class="problem-paper__title text-xl font-black uppercase text-(--ink-strong)">
+										Pasa filtros sin perder fuerza humana
+									</p>
+									<p class="problem-paper__copy text-base text-(--ink-soft)">
+										CV Optimizer ordena el contenido para que el ATS lo entienda, refuerza el keywording
+										y convierte experiencia difusa en logros que se explican solos cuando por fin lo lee
+										una persona.
+									</p>
+								</div>
+							</div>
 						</div>
-					</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
+
+<style>
+	.problem-paper {
+		--problem-rule-step: 1.96rem;
+		--problem-rule-shift: 0.72rem;
+		--problem-copy-offset: 0.54rem;
+		padding-top: calc(var(--problem-rule-step) * 0.9);
+		padding-bottom: calc(var(--problem-rule-step) * 1.1);
+	}
+
+	.problem-paper::before {
+		background-position:
+			0 0,
+			0 var(--problem-rule-shift);
+	}
+
+	.problem-paper__header {
+		padding-bottom: calc(var(--problem-rule-step) * 1.2);
+	}
+
+	.problem-paper__headline {
+		max-width: 12ch;
+		font-size: clamp(3.25rem, 6vw, 5.2rem);
+		line-height: 0.9;
+		letter-spacing: -0.055em;
+	}
+
+	.problem-paper__list {
+		margin-top: calc(var(--problem-rule-step) * 0.95);
+	}
+
+	.problem-paper__row {
+		display: grid;
+		gap: 1rem;
+		padding-block: calc(var(--problem-rule-step) * 1.02);
+	}
+
+	.problem-paper__eyebrow {
+		padding-top: 0.45rem;
+		line-height: 1;
+	}
+
+	.problem-paper__content {
+		padding-top: 0.2rem;
+	}
+
+	.problem-paper__title {
+		line-height: 0.98;
+		text-wrap: balance;
+	}
+
+	.problem-paper__copy {
+		max-width: 35rem;
+		margin-top: var(--problem-copy-offset);
+		line-height: var(--problem-rule-step);
+		text-wrap: pretty;
+	}
+
+	@media (min-width: 640px) {
+		.problem-paper {
+			padding-top: calc(var(--problem-rule-step) * 1.05);
+		}
+
+		.problem-paper__row {
+			grid-template-columns: 10.5rem minmax(0, 1fr);
+			align-items: start;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.problem-paper__headline {
+			max-width: 18ch;
+		}
+
+		.problem-paper__copy {
+			max-width: 39rem;
+		}
+	}
+</style>

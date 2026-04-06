@@ -2,16 +2,16 @@
 import '../../styles/cv-templates/document-upload-preview.css';
 ---
 
-<section class="fade-up-delay flex flex-col items-center space-y-4 text-center" aria-label="Carga de documento">
+<section class="fade-up-delay flex flex-col gap-5 text-left" aria-label="Carga de documento">
 	<form
 		data-upload-form
-		class="flex w-full flex-col items-center space-y-4 rounded-2xl border border-(--line) p-5 text-center md:p-6"
+		class="brutal-card flex w-full flex-col gap-5 p-5 md:p-6"
 	>
-		<div class="space-y-2">
-			<label for="cv-document" class="text-base font-semibold text-(--ink-strong)">
+		<div class="space-y-2 text-center sm:text-left">
+			<label for="cv-document" class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--ink-soft)">
 				Sube tu CV
 			</label>
-			<p class="text-sm text-(--ink-soft)">
+			<p class="text-sm leading-relaxed text-(--ink-soft)">
 				Formatos permitidos: PDF, HTML, YAML, YML y TXT. Tamaño máximo: 10 MB.
 			</p>
 		</div>
@@ -29,21 +29,21 @@ import '../../styles/cv-templates/document-upload-preview.css';
 		<label
 			for="cv-document"
 			data-upload-picker
-			class="mx-auto flex w-full max-w-2xl items-center justify-center gap-4 rounded-xl border border-(--line) bg-(--surface) px-4 py-3 text-sm font-medium text-(--ink-soft)"
+			class="brutal-control mx-auto flex w-full max-w-2xl items-center justify-between gap-4 bg-(--paper-muted) px-4 py-4 text-sm font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 		>
-			<span
-				class="inline-flex shrink-0 rounded-lg bg-(--brand-optimizer) px-4 py-2 text-sm font-semibold text-white"
-			>
+			<span class="brutal-chip shrink-0 bg-(--note-mint) px-4 py-2 text-[0.68rem] text-(--ink-strong)">
 				Choose File
 			</span>
-			<span data-upload-file-name class="truncate text-center">No file chosen</span>
+			<span data-upload-file-name class="min-w-0 truncate text-center text-xs text-(--ink-soft) sm:text-sm">
+				No file chosen
+			</span>
 		</label>
 
 		<div
 			data-target-positions-shell
-			class="mx-auto flex w-full max-w-2xl flex-col gap-2 rounded-xl border border-(--line) bg-white/84 p-4 text-left"
+			class="mx-auto flex w-full max-w-2xl flex-col gap-2 bg-white p-4 text-left"
 		>
-			<label for="target-position-input" class="text-sm font-semibold text-(--ink-strong)">
+			<label for="target-position-input" class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--ink-soft)">
 				Posición objetivo (opcional)
 			</label>
 			<p class="text-xs leading-relaxed text-(--ink-soft)">
@@ -61,7 +61,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 				data-target-position-input
 				autocomplete="off"
 				placeholder="Ejemplo: Analista de datos, BI Analyst"
-				class="w-full rounded-xl border border-(--line) bg-white px-4 py-3 text-sm text-(--ink-strong) placeholder:text-(--ink-soft)"
+				class="brutal-field px-4 py-3 text-sm placeholder:text-(--ink-soft)"
 			/>
 			<input type="hidden" name="targetPositions" data-target-positions-hidden value="[]" />
 
@@ -75,7 +75,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 			<button
 				type="submit"
 				data-upload-submit
-				class="inline-flex w-full items-center justify-center rounded-xl bg-(--brand-cv) px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:brightness-110 sm:w-auto md:px-12"
+				class="brutal-button brutal-button--accent w-full px-6 py-4 text-sm uppercase tracking-[0.08em] sm:w-auto md:px-12"
 			>
 				Generar CV optimizado
 			</button>
@@ -84,7 +84,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 				type="button"
 				data-upload-retry
 				hidden
-				class="inline-flex w-full items-center justify-center rounded-xl border border-(--line) bg-white px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface) sm:w-auto md:px-12"
+				class="brutal-button w-full px-6 py-4 text-sm uppercase tracking-[0.08em] sm:w-auto md:px-12"
 			>
 				Reintentar
 			</button>
@@ -94,7 +94,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 	<aside
 		data-upload-status
 		hidden
-		class="w-full rounded-2xl border border-(--line) bg-white/80 p-5 text-left text-sm text-(--ink-strong)"
+		class="brutal-card w-full p-5 text-left text-sm text-(--ink-strong)"
 		aria-live="polite"
 	>
 		<h3 data-upload-status-title class="text-base font-bold"></h3>
@@ -105,13 +105,15 @@ import '../../styles/cv-templates/document-upload-preview.css';
 	<section
 		data-upload-result
 		hidden
-		class="w-full rounded-2xl border border-(--line) bg-white/85 p-5 text-left"
+		class="w-full p-1 text-left"
 	>
-		<h3 class="text-base font-bold text-(--ink-strong)">CV optimizado por IA</h3>
+		<h3 class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--brand-optimizer)">
+			CV optimizado por IA
+		</h3>
 		<div data-cv-editor-controls class="mt-3 flex flex-wrap items-center gap-3">
 			<label
 				for="cv-primary-color"
-				class="inline-flex items-center gap-2 rounded-lg border border-(--line) bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
+				class="brutal-control items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
 			>
 				Color principal
 				<input
@@ -125,21 +127,21 @@ import '../../styles/cv-templates/document-upload-preview.css';
 			<button
 				type="button"
 				data-cv-export-html
-				class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+				class="brutal-control px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 			>
 				Exportar HTML
 			</button>
 			<button
 				type="button"
 				data-cv-export-txt
-				class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+				class="brutal-control px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 			>
 				Exportar TXT
 			</button>
 			<button
 				type="button"
 				data-cv-export-pdf
-				class="group relative inline-flex items-center justify-center gap-2 rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-optimizer)"
+				class="brutal-control group relative gap-2 px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 			>
 				<span>Exportar PDF</span>
 				<span
@@ -167,7 +169,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 				<span
 					data-pdf-help-tooltip
 					role="tooltip"
-					class="pointer-events-none invisible absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-lg border border-(--line) bg-white px-3 py-2 text-[11px] normal-case font-medium tracking-normal leading-relaxed text-(--ink-soft) opacity-0 shadow-[0_12px_24px_rgba(12,22,26,0.12)] transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+					class="brutal-tooltip pointer-events-none invisible absolute left-1/2 top-full z-20 mt-3 w-72 -translate-x-1/2 px-3 py-2 text-[11px] font-medium normal-case tracking-normal leading-relaxed text-(--ink-soft) opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
 				>
 					La exportación PDF se realiza mediante la vista de impresión del navegador. Si no se abre automáticamente,
 					usa Cmd/Ctrl+P y guarda como PDF.
@@ -181,21 +183,21 @@ import '../../styles/cv-templates/document-upload-preview.css';
 			data-upload-result-preview
 			contenteditable="true"
 			spellcheck="true"
-			class="mt-3 max-h-[70vh] overflow-auto rounded-xl border border-(--line) bg-white p-6 text-sm text-(--ink-strong)"
+			class="mt-3 max-h-[70vh] overflow-auto border-2 border-(--line) bg-white p-6 text-sm text-(--ink-strong) shadow-[6px_6px_0_var(--shadow)]"
 		></div>
 		<details class="mt-3">
 			<summary class="cursor-pointer text-sm font-semibold text-(--ink-soft)">Ver HTML generado</summary>
 			<pre
 				data-upload-result-raw
-				class="mt-2 max-h-64 overflow-auto rounded-xl border border-(--line) bg-white p-3 text-xs text-(--ink-soft)"
+				class="mt-2 max-h-64 overflow-auto border-2 border-(--line) bg-white p-3 text-xs text-(--ink-soft) shadow-[4px_4px_0_var(--shadow)]"
 			></pre>
 		</details>
 	</section>
 
-	<section data-upload-history class="w-full rounded-2xl bg-white/75 p-5 text-left">
+	<section data-upload-history class="w-full p-1 text-left">
 		<div class="flex flex-wrap items-end justify-between gap-2">
 			<div>
-				<h3 class="text-base font-bold text-(--ink-strong)">Historial local</h3>
+				<h3 class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--ink-strong)">Historial local</h3>
 				<p class="mt-1 text-xs text-(--ink-soft)">
 					Guardamos versiones en este navegador para reabrirlas sin volver a subir el archivo.
 				</p>
@@ -203,7 +205,7 @@ import '../../styles/cv-templates/document-upload-preview.css';
 			<button
 				type="button"
 				data-upload-history-clear
-				class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+				class="brutal-control px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 			>
 				Limpiar historial
 			</button>

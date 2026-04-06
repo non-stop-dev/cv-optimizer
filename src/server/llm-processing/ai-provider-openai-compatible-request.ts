@@ -294,7 +294,8 @@ export const buildOpenAiCompatibleChatRequest = async (
  * Extracts plain text from a chat completion response across string and part arrays.
  */
 export const extractChatCompletionText = (completion: ChatCompletion): string => {
-	const messageContent = completion.choices[0]?.message?.content;
+	const firstChoice = Array.isArray(completion.choices) ? completion.choices[0] : undefined;
+	const messageContent = firstChoice?.message?.content;
 	if (typeof messageContent === 'string') {
 		return messageContent.trim();
 	}

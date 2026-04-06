@@ -12,10 +12,10 @@ const safeEntryId = typeof id === 'string' ? id : '';
 ---
 
 <Layout title="CV Optimizer | Resultado optimizado">
-	<main class="relative min-h-screen pb-16 bg-white">
+	<main class="landing-page relative min-h-screen pb-16">
 		<NavBar />
-		<section class="relative mx-auto w-full max-w-5xl px-6 pb-8 pt-12 md:px-10 md:pb-14 md:pt-16">
-			<div class="fade-up relative overflow-hidden rounded-4xl border border-(--line) bg-white/82 p-8 shadow-[0_20px_48px_rgba(18,35,38,0.1)] md:p-12">
+		<section class="landing-shell relative px-6 pb-8 pt-12 md:px-10 md:pb-14 md:pt-16">
+			<div class="fade-up brutal-paper px-6 py-7 sm:px-8 sm:py-8 md:px-10 md:py-10">
 				<div class="pointer-events-none absolute -right-20 -top-18 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(222,60,75,0.2)_0%,transparent_68%)]"></div>
 				<div class="pointer-events-none absolute -left-24 -bottom-27.5 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(15,118,110,0.18)_0%,transparent_68%)]"></div>
 
@@ -27,7 +27,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 					<div class="flex flex-wrap items-center justify-between gap-3">
 						<a
 							href="/optimizer"
-							class="inline-flex items-center justify-center rounded-lg border border-(--line) bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+							class="brutal-button px-4 py-2 text-xs uppercase tracking-[0.08em]"
 						>
 							Volver
 						</a>
@@ -42,7 +42,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 					<aside
 						data-output-status
 						hidden
-						class="w-full rounded-2xl border border-(--line) bg-white/80 p-5 text-left text-sm text-(--ink-strong)"
+						class="brutal-card w-full p-5 text-left text-sm text-(--ink-strong)"
 						aria-live="polite"
 					>
 						<h3 data-output-status-title class="text-base font-bold"></h3>
@@ -54,13 +54,15 @@ const safeEntryId = typeof id === 'string' ? id : '';
 						hidden
 						class="w-full text-left"
 					>
-						<h3 class="text-base font-bold text-(--ink-strong)">CV optimizado por IA</h3>
+						<h3 class="font-mono text-[0.72rem] font-black uppercase tracking-[0.24em] text-(--brand-optimizer)">
+							CV optimizado por IA
+						</h3>
 						<div class="mt-3 space-y-2">
-							<div data-cv-action-controls class="flex items-center gap-2">
+							<div data-cv-action-controls class="flex flex-wrap items-center gap-2">
 								<button
 									type="button"
 									data-cv-translate-en
-									class="group inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-(--line) bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface) disabled:cursor-not-allowed disabled:opacity-55"
+									class="brutal-control group h-9 shrink-0 gap-2 px-4 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) disabled:cursor-not-allowed disabled:opacity-55"
 								>
 									<span data-cv-translate-en-label>Traducir al inglés</span>
 									<span class="relative inline-flex h-4 w-4 items-center justify-center text-(--ink-soft)">
@@ -84,7 +86,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 											<span
 												data-cv-translate-source-tooltip
 												role="tooltip"
-												class="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 w-56 -translate-x-1/2 rounded-md border border-(--line) bg-white px-2 py-1 text-[10px] font-medium normal-case tracking-normal text-(--ink-soft) opacity-0 shadow-[0_8px_20px_rgba(12,22,26,0.16)] transition group-hover:opacity-100 group-focus-visible:opacity-100"
+												class="brutal-tooltip pointer-events-none absolute left-1/2 top-[calc(100%+0.65rem)] z-20 w-56 -translate-x-1/2 px-2 py-1 text-[10px] font-medium normal-case tracking-normal text-(--ink-soft) opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100"
 											>
 												Traduce el CV al inglés.
 											</span>
@@ -96,7 +98,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 										data-cv-export-trigger
 										aria-haspopup="menu"
 										aria-expanded="false"
-										class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-(--line) bg-white px-4 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+										class="brutal-control h-9 gap-2 px-4 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 									>
 										<span>Exportar</span>
 										<svg
@@ -117,13 +119,13 @@ const safeEntryId = typeof id === 'string' ? id : '';
 										data-cv-export-list
 										hidden
 										role="menu"
-										class="absolute left-0 top-[calc(100%+0.35rem)] z-20 flex min-w-40 flex-col gap-1 rounded-lg border border-(--line) bg-white p-1 shadow-[0_12px_24px_rgba(12,22,26,0.12)]"
+										class="brutal-tooltip absolute left-0 top-[calc(100%+0.65rem)] z-20 flex min-w-40 flex-col gap-1 p-1"
 									>
 										<button
 											type="button"
 											data-cv-export-option="html"
 											role="menuitem"
-											class="inline-flex h-8 items-center justify-start rounded-md px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+											class="brutal-control h-8 justify-start px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 										>
 											Exportar HTML
 										</button>
@@ -131,7 +133,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 											type="button"
 											data-cv-export-option="txt"
 											role="menuitem"
-											class="inline-flex h-8 items-center justify-start rounded-md px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+											class="brutal-control h-8 justify-start px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 										>
 											Exportar TXT
 										</button>
@@ -139,7 +141,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 											type="button"
 											data-cv-export-option="pdf"
 											role="menuitem"
-											class="inline-flex h-8 items-center justify-start rounded-md px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong) transition hover:bg-(--surface)"
+											class="brutal-control h-8 justify-start px-3 text-xs font-bold uppercase tracking-[0.08em] text-(--ink-strong)"
 										>
 											Exportar PDF
 										</button>
@@ -149,7 +151,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<div data-cv-editor-controls class="flex items-center gap-2 overflow-x-auto pb-1">
 							<label
 								for="cv-primary-color"
-								class="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-(--line) bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
+								class="brutal-control h-9 shrink-0 gap-2 px-3 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
 							>
 								<span>Color principal</span>
 								<input
@@ -162,13 +164,13 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							</label>
 							<label
 								for="cv-template-select"
-								class="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-(--line) bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
+								class="brutal-control h-9 shrink-0 gap-2 px-3 text-xs font-semibold uppercase tracking-[0.08em] text-(--ink-soft)"
 							>
 								<span>Plantilla</span>
 								<select
 									id="cv-template-select"
 									data-cv-template-select
-									class="h-6 rounded border border-(--line) bg-white px-2 text-[11px] font-bold uppercase tracking-[0.08em] text-(--ink-strong) focus:outline-none"
+									class="h-6 border-2 border-(--line) bg-white px-2 text-[11px] font-bold uppercase tracking-[0.08em] text-(--ink-strong) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-optimizer)"
 								>
 									{CV_TEMPLATE_OPTIONS.map((template) => (
 										<option value={template.id}>{template.label}</option>
@@ -178,7 +180,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-undo
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-(--ink-strong) transition hover:bg-(--surface) disabled:cursor-not-allowed disabled:opacity-55"
+								class="brutal-control h-9 w-9 shrink-0 text-(--ink-strong) disabled:cursor-not-allowed disabled:opacity-55"
 								aria-label="Deshacer"
 								title="Deshacer"
 							>
@@ -201,7 +203,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-redo
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-(--ink-strong) transition hover:bg-(--surface) disabled:cursor-not-allowed disabled:opacity-55"
+								class="brutal-control h-9 w-9 shrink-0 text-(--ink-strong) disabled:cursor-not-allowed disabled:opacity-55"
 								aria-label="Rehacer"
 								title="Rehacer"
 							>
@@ -224,7 +226,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-format-bold
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-sm font-bold text-(--ink-strong) transition hover:bg-(--surface)"
+								class="brutal-control h-9 w-9 shrink-0 text-sm font-bold text-(--ink-strong)"
 								aria-label="Negrita"
 								title="Negrita"
 							>
@@ -233,7 +235,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-format-italic
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-sm italic font-semibold text-(--ink-strong) transition hover:bg-(--surface)"
+								class="brutal-control h-9 w-9 shrink-0 text-sm italic font-semibold text-(--ink-strong)"
 								aria-label="Cursiva"
 								title="Cursiva"
 							>
@@ -242,7 +244,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-format-underline
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-sm underline font-semibold text-(--ink-strong) transition hover:bg-(--surface)"
+								class="brutal-control h-9 w-9 shrink-0 text-sm font-semibold underline text-(--ink-strong)"
 								aria-label="Subrayado"
 								title="Subrayado"
 							>
@@ -251,7 +253,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							<button
 								type="button"
 								data-cv-format-link
-								class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-(--line) bg-white text-(--ink-strong) transition hover:bg-(--surface)"
+								class="brutal-control h-9 w-9 shrink-0 text-(--ink-strong)"
 								aria-label="Insertar enlace"
 								title="Insertar enlace"
 							>
@@ -280,7 +282,7 @@ const safeEntryId = typeof id === 'string' ? id : '';
 							data-output-preview
 							contenteditable="true"
 							spellcheck="true"
-							class="mt-3 max-h-[70vh] overflow-auto rounded-xl border border-(--line) bg-white p-6 text-sm text-(--ink-strong)"
+							class="mt-3 max-h-[70vh] overflow-auto border-2 border-(--line) bg-white p-6 text-sm text-(--ink-strong) shadow-[6px_6px_0_var(--shadow)]"
 						></div>
 						<pre data-output-raw hidden></pre>
 					</section>

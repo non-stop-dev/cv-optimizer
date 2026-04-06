@@ -7,7 +7,8 @@ import { describe, expect, it } from 'vitest';
 import {
 	buildOpenAiCompatibleChatRequest,
 	buildOptimizeCvUserContent,
-	buildTranslationUserContent
+	buildTranslationUserContent,
+	extractChatCompletionText
 } from './ai-provider-openai-compatible-request';
 import { CV_OPTIMIZER_SYSTEM_PROMPT } from './cv-optimizer-system-prompt';
 
@@ -34,6 +35,9 @@ describe('buildOpenAiCompatibleChatRequest', () => {
 
 		expect(builtRequest.normalizedSystemPrompt).toBe(CV_OPTIMIZER_SYSTEM_PROMPT);
 		expect(builtRequest.normalizedSystemPrompt).not.toContain('NON-NEGOTIABLE DATA INTEGRITY RULES');
+		expect(builtRequest.normalizedSystemPrompt).toContain(
+			'Normalize visually noisy, malformed, or leetspeak characters to their standard spelling'
+		);
 
 		const request = builtRequest.request as ChatCompletionCreateParamsNonStreaming;
 		const userMessage = extractUserMessage(request.messages);
@@ -110,5 +114,23 @@ describe('buildOpenAiCompatibleChatRequest', () => {
 		expect(userPrompt).toContain('Preserve the exact HTML structure');
 		expect(userPrompt).toContain('<source_cv_html>');
 		expect(userPrompt).toContain('<section><p>Hola mundo</p></section>');
+	});
+});
+
+describe('extractChatCompletionText', () => {
+	it('devuelve cadena vacia cuando el proveedor responde sin choices', () => {
+		expect(
+			extractChatCompletionText({
+				id: 'chatcmpl-missing-choices',
+				object: 'chat.completion',
+				created: 0,
+				model: 'openrouter/test',
+				usage: {
+					prompt_tokens: 1,
+					completion_tokens: 0,
+					total_tokens: 1
+				}
+			} as never)
+		).toBe('');
 	});
 });
