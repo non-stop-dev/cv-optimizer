@@ -34,7 +34,7 @@ const CV_SANITIZE_CONFIG = {
 	ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class'],
 	ALLOW_DATA_ATTR: false,
 	ALLOW_UNKNOWN_PROTOCOLS: false,
-	ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i
+	ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i
 };
 
 export const sanitizeCvHtml = (html: string): string => {
