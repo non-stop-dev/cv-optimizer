@@ -31,7 +31,7 @@ const CV_SANITIZE_CONFIG = {
 		'th',
 		'td'
 	],
-	ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class'],
+	ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class', 'style'],
 	ALLOW_DATA_ATTR: false,
 	ALLOW_UNKNOWN_PROTOCOLS: false,
 	ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i

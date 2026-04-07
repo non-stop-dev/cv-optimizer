@@ -1,6 +1,8 @@
 import {
 	buildHtmlExportDocument,
-	buildPrintableHtml,
+	buildPrintableHtmlEditable,
+	buildPrintableHtmlSimple,
+	buildWordExportDocument,
 	downloadTextFile,
 	openPrintPreview,
 	toSafeFileName,
@@ -83,17 +85,30 @@ export const createOptimizerEditionExportWorkflow = (
 		downloadTextFile(fileName, plainText, 'text/plain;charset=utf-8');
 	};
 
-	const exportCurrentPdf = (): void => {
+	const exportCurrentWord = (): void => {
 		if (!resultPreview.innerHTML.trim()) {
 			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
 			return;
 		}
 
-		const printableHtml = buildPrintableHtml(
+		const fileName = toSafeFileName(getCurrentDocumentBaseName(), 'doc');
+		const wordDocument = buildWordExportDocument(
 			resultPreview.innerHTML,
 			cvPrimaryColorPicker.value,
 			getSelectedTemplateId()
 		);
+		downloadTextFile(fileName, wordDocument, 'application/msword');
+	};
+
+	const exportPdf = (
+		printableHtml: string,
+		statusMessage: string
+	): void => {
+		if (!resultPreview.innerHTML.trim()) {
+			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
+			return;
+		}
+
 		const opened = openPrintPreview(printableHtml);
 		if (!opened) {
 			setStatus(
@@ -107,7 +122,39 @@ export const createOptimizerEditionExportWorkflow = (
 		setStatus(
 			'proceso',
 			'PDF listo para imprimir',
-			'Se abrio una pestana de impresion. Si no aparece el dialogo automatico, usa Cmd/Ctrl+P para guardar como PDF.'
+			statusMessage
+		);
+	};
+
+	const exportCurrentSimplePdf = (): void => {
+		if (!resultPreview.innerHTML.trim()) {
+			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
+			return;
+		}
+
+		exportPdf(
+			buildPrintableHtmlSimple(
+				resultPreview.innerHTML,
+				cvPrimaryColorPicker.value,
+				getSelectedTemplateId()
+			),
+			'Se abrio una pestana de impresion para un PDF simple. Si no aparece el dialogo automatico, usa Cmd/Ctrl+P para guardar como PDF.'
+		);
+	};
+
+	const exportCurrentEditablePdf = (): void => {
+		if (!resultPreview.innerHTML.trim()) {
+			setStatus('error', 'No hay contenido para exportar', 'Edita o carga un CV antes de exportar.');
+			return;
+		}
+
+		exportPdf(
+			buildPrintableHtmlEditable(
+				resultPreview.innerHTML,
+				cvPrimaryColorPicker.value,
+				getSelectedTemplateId()
+			),
+			'Se abrio una pestana de impresion para un PDF editable en CV Optimizer. Si no aparece el dialogo automatico, usa Cmd/Ctrl+P para guardar como PDF.'
 		);
 	};
 
@@ -119,8 +166,14 @@ export const createOptimizerEditionExportWorkflow = (
 			case 'txt':
 				exportCurrentTxt();
 				return;
-			case 'pdf':
-				exportCurrentPdf();
+			case 'word':
+				exportCurrentWord();
+				return;
+			case 'pdf-simple':
+				exportCurrentSimplePdf();
+				return;
+			case 'pdf-editable':
+				exportCurrentEditablePdf();
 				return;
 			default:
 				setStatus('error', 'Formato no soportado', 'Selecciona un formato de exportacion valido.');

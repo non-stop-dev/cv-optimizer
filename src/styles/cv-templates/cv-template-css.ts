@@ -1,5 +1,40 @@
 import type { CvTemplateId } from './cv-template-options';
 
+const buildTextFormattingCss = (selector: string): string => {
+	return `
+${selector} .cv-text-size-xs {
+	font-size: 0.78em;
+}
+${selector} .cv-text-size-sm {
+	font-size: 0.9em;
+}
+${selector} .cv-text-size-md {
+	font-size: 1em;
+}
+${selector} .cv-text-size-lg {
+	font-size: 1.15em;
+}
+${selector} .cv-text-size-xl {
+	font-size: 1.3em;
+}
+${selector} .cv-text-color-default {
+	color: inherit;
+}
+${selector} .cv-text-color-muted {
+	color: #667781;
+}
+${selector} .cv-text-color-primary {
+	color: var(--cv-primary);
+}
+${selector} .cv-text-color-accent {
+	color: #7c3aed;
+}
+${selector} .cv-text-color-danger {
+	color: #b42318;
+}
+`;
+};
+
 const buildDefaultTemplateCss = (selector: string): string => {
 	return `
 ${selector} {
@@ -53,6 +88,7 @@ ${selector} a {
 	text-decoration-thickness: 1px;
 	text-underline-offset: 2px;
 }
+${buildTextFormattingCss(selector)}
 `;
 };
 
@@ -131,6 +167,7 @@ ${selector} hr {
 	border: 0;
 	border-top: 1px solid color-mix(in srgb, var(--cv-primary), white 74%);
 }
+${buildTextFormattingCss(selector)}
 `;
 };
 
@@ -209,6 +246,7 @@ ${selector} hr {
 	border: 0;
 	border-top: 1px solid color-mix(in srgb, var(--cv-primary), white 78%);
 }
+${buildTextFormattingCss(selector)}
 `;
 };
 
@@ -286,6 +324,7 @@ ${selector} hr {
 	border: 0;
 	border-top: 1px solid color-mix(in srgb, var(--cv-primary), white 68%);
 }
+${buildTextFormattingCss(selector)}
 `;
 };
 

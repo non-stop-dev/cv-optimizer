@@ -1,85 +1,26 @@
+import {
+	getActiveRangeWithinEditor,
+	getCurrentRangeWithinEditor
+} from './active-selection-range.client';
+
 export type InlineTextFormat = 'bold' | 'italic' | 'underline';
+export type TextSizeFormat =
+	| 'cv-text-size-xs'
+	| 'cv-text-size-sm'
+	| 'cv-text-size-md'
+	| 'cv-text-size-lg'
+	| 'cv-text-size-xl';
+export type TextColorFormat = string;
 
-const getActiveSelection = (): Selection | null => {
-	const selection = window.getSelection();
-	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-		return null;
-	}
+const TEXT_SIZE_CLASSES: ReadonlyArray<TextSizeFormat> = [
+	'cv-text-size-xs',
+	'cv-text-size-sm',
+	'cv-text-size-md',
+	'cv-text-size-lg',
+	'cv-text-size-xl'
+];
 
-	return selection;
-};
-
-const isNodeInsideEditor = (editor: HTMLElement, node: Node | null): boolean => {
-	if (!node) {
-		return false;
-	}
-
-	return editor.contains(node);
-};
-
-const hasActiveSelectionInsideEditor = (editor: HTMLElement): boolean => {
-	const selection = getActiveSelection();
-	if (!selection) {
-		return false;
-	}
-
-	return (
-		isNodeInsideEditor(editor, selection.anchorNode) &&
-		isNodeInsideEditor(editor, selection.focusNode)
-	);
-};
-
-export const captureSelectionRange = (editor: HTMLElement): Range | null => {
-	const selection = getActiveSelection();
-	if (!selection) {
-		return null;
-	}
-
-	if (
-		!isNodeInsideEditor(editor, selection.anchorNode) ||
-		!isNodeInsideEditor(editor, selection.focusNode)
-	) {
-		return null;
-	}
-
-	return selection.getRangeAt(0).cloneRange();
-};
-
-export const restoreSelectionRange = (range: Range | null): boolean => {
-	if (!range) {
-		return false;
-	}
-
-	const selection = window.getSelection();
-	if (!selection) {
-		return false;
-	}
-
-	selection.removeAllRanges();
-	selection.addRange(range);
-	return true;
-};
-
-const getActiveRangeWithinEditor = (editor: HTMLElement): Range | null => {
-	const selection = getActiveSelection();
-	if (!selection) {
-		return null;
-	}
-
-	if (
-		!isNodeInsideEditor(editor, selection.anchorNode) ||
-		!isNodeInsideEditor(editor, selection.focusNode)
-	) {
-		return null;
-	}
-
-	const range = selection.getRangeAt(0);
-	if (range.collapsed || range.toString().trim().length === 0) {
-		return null;
-	}
-
-	return range;
-};
+const CUSTOM_TEXT_COLOR_CLASS = 'cv-text-color-custom';
 
 const findNearestFormatAncestor = (
 	editor: HTMLElement,
@@ -193,6 +134,40 @@ const wrapActiveSelection = (
 	return true;
 };
 
+const unwrapExistingFormatWrappers = (
+	editor: HTMLElement,
+	range: Range,
+	candidateClasses: readonly string[]
+): void => {
+	const wrapperNodes = Array.from(editor.querySelectorAll('span')).filter((node) =>
+		candidateClasses.some((className) => node.classList.contains(className))
+	);
+
+	for (const wrapperNode of wrapperNodes) {
+		if (
+			range.intersectsNode(wrapperNode) &&
+			selectionCoversEntireElementContents(range, wrapperNode)
+		) {
+			unwrapElementPreservingSelection(wrapperNode);
+		}
+	}
+};
+
+const unwrapExistingCustomColorWrappers = (editor: HTMLElement, range: Range): void => {
+	const wrapperNodes = Array.from(
+		editor.querySelectorAll<HTMLElement>(`span.${CUSTOM_TEXT_COLOR_CLASS}`)
+	);
+
+	for (const wrapperNode of wrapperNodes) {
+		if (
+			range.intersectsNode(wrapperNode) &&
+			selectionCoversEntireElementContents(range, wrapperNode)
+		) {
+			unwrapElementPreservingSelection(wrapperNode);
+		}
+	}
+};
+
 const normalizeLinkHref = (rawValue: string): string | null => {
 	const trimmedValue = rawValue.trim();
 	if (!trimmedValue) {
@@ -226,6 +201,205 @@ export const applyInlineTextFormat = (editor: HTMLElement, action: InlineTextFor
 	});
 };
 
+const applySelectionClassFormat = (
+	editor: HTMLElement,
+	className: string,
+	candidateClasses: readonly string[]
+): boolean => {
+	const range = getActiveRangeWithinEditor(editor);
+	if (!range) {
+		return false;
+	}
+
+	unwrapExistingFormatWrappers(editor, range, candidateClasses);
+
+	return wrapActiveSelection(editor, () => {
+		const wrapper = document.createElement('span');
+		wrapper.classList.add(className);
+		return wrapper;
+	});
+};
+
+export const applyTextSizeFormat = (
+	editor: HTMLElement,
+	sizeClassName: TextSizeFormat
+): boolean => {
+	return applySelectionClassFormat(editor, sizeClassName, TEXT_SIZE_CLASSES);
+};
+
+export const applyTextColorFormat = (
+	editor: HTMLElement,
+	colorValue: TextColorFormat
+): boolean => {
+	const normalizedColorValue = colorValue.trim();
+	if (!/^#(?:[0-9a-f]{6})$/i.test(normalizedColorValue)) {
+		return false;
+	}
+
+	const range = getActiveRangeWithinEditor(editor);
+	if (!range) {
+		return false;
+	}
+
+	unwrapExistingCustomColorWrappers(editor, range);
+
+	return wrapActiveSelection(editor, () => {
+		const wrapper = document.createElement('span');
+		wrapper.classList.add(CUSTOM_TEXT_COLOR_CLASS);
+		wrapper.style.color = normalizedColorValue;
+		return wrapper;
+	});
+};
+
+const findNearestBlockElement = (editor: HTMLElement, node: Node | null): HTMLElement | null => {
+	let currentElement =
+		node instanceof HTMLElement ? node : node?.parentElement ?? null;
+
+	while (currentElement && currentElement !== editor) {
+		const tagName = currentElement.tagName.toLowerCase();
+		if (tagName === 'p' || tagName === 'div' || tagName === 'li') {
+			return currentElement;
+		}
+
+		currentElement = currentElement.parentElement;
+	}
+
+	return null;
+};
+
+const getSelectedBlockElements = (editor: HTMLElement, range: Range): HTMLElement[] => {
+	if (range.collapsed) {
+		const activeBlock = findNearestBlockElement(editor, range.startContainer);
+		return activeBlock ? [activeBlock] : [];
+	}
+
+	const blockElements = Array.from(editor.querySelectorAll<HTMLElement>('p, div, li')).filter(
+		(element) => {
+		if (!range.intersectsNode(element)) {
+			return false;
+		}
+
+		if (element.textContent?.trim().length === 0) {
+			return false;
+		}
+
+		return !Array.from(element.children).some((child) => {
+			if (!(child instanceof HTMLElement)) {
+				return false;
+			}
+
+			const tagName = child.tagName.toLowerCase();
+			return tagName === 'p' || tagName === 'div' || tagName === 'li';
+		});
+	});
+
+	return blockElements;
+};
+
+const toggleBulletListWithNativeCommand = (editor: HTMLElement): boolean => {
+	if (typeof document.execCommand !== 'function') {
+		return false;
+	}
+
+	editor.focus();
+	return document.execCommand('insertUnorderedList', false);
+};
+
+const unwrapListItemIntoParagraph = (listItem: HTMLElement): HTMLParagraphElement | null => {
+	const listElement = listItem.parentElement;
+	if (!listElement || (listElement.tagName !== 'UL' && listElement.tagName !== 'OL')) {
+		return null;
+	}
+
+	const paragraph = document.createElement('p');
+	paragraph.innerHTML = listItem.innerHTML;
+	listElement.parentNode?.insertBefore(paragraph, listElement);
+	listItem.remove();
+
+	if (listElement.children.length === 0) {
+		listElement.remove();
+	}
+
+	return paragraph;
+};
+
+const toggleBulletListWithFallback = (editor: HTMLElement): boolean => {
+	const range = getCurrentRangeWithinEditor(editor);
+	if (!range) {
+		return false;
+	}
+
+	const selectedBlocks = getSelectedBlockElements(editor, range);
+	if (selectedBlocks.length === 0) {
+		return false;
+	}
+
+	if (selectedBlocks.every((block) => block.tagName.toLowerCase() === 'li')) {
+		const convertedParagraphs = selectedBlocks
+			.map((block) => unwrapListItemIntoParagraph(block))
+			.filter((block): block is HTMLParagraphElement => block instanceof HTMLParagraphElement);
+
+		if (convertedParagraphs.length === 0) {
+			return false;
+		}
+
+		const selection = window.getSelection();
+		if (selection) {
+			selection.removeAllRanges();
+			const nextRange = document.createRange();
+			nextRange.setStartBefore(convertedParagraphs[0]);
+			nextRange.setEndAfter(convertedParagraphs[convertedParagraphs.length - 1]);
+			selection.addRange(nextRange);
+		}
+
+		return true;
+	}
+
+	const firstBlock = selectedBlocks[0];
+	const listElement = document.createElement('ul');
+
+	for (const block of selectedBlocks) {
+		const listItem = document.createElement('li');
+		listItem.innerHTML = block.innerHTML;
+		listElement.appendChild(listItem);
+	}
+
+	firstBlock.parentNode?.insertBefore(listElement, firstBlock);
+	for (const block of selectedBlocks) {
+		block.remove();
+	}
+
+	const firstListItem = listElement.querySelector('li');
+	const lastListItem = listElement.querySelector('li:last-child');
+	if (!firstListItem || !lastListItem) {
+		return false;
+	}
+
+	const selection = window.getSelection();
+	if (selection) {
+		selection.removeAllRanges();
+		const nextRange = document.createRange();
+		nextRange.setStartBefore(firstListItem);
+		nextRange.setEndAfter(lastListItem);
+		selection.addRange(nextRange);
+	}
+
+	return true;
+};
+
+export const toggleBulletListOnSelection = (editor: HTMLElement): boolean => {
+	const range = getCurrentRangeWithinEditor(editor);
+	if (!range || !findNearestBlockElement(editor, range.startContainer)) {
+		return false;
+	}
+
+	if (toggleBulletListWithNativeCommand(editor)) {
+		return true;
+	}
+
+	return toggleBulletListWithFallback(editor);
+};
+
 export const applyLinkOnSelection = (editor: HTMLElement, rawHref: string): boolean => {
 	const normalizedHref = normalizeLinkHref(rawHref);
 	if (!normalizedHref) {
@@ -239,8 +413,4 @@ export const applyLinkOnSelection = (editor: HTMLElement, rawHref: string): bool
 		link.rel = 'noopener noreferrer';
 		return link;
 	});
-};
-
-export const hasTextSelectionInsideEditor = (editor: HTMLElement): boolean => {
-	return hasActiveSelectionInsideEditor(editor);
 };

@@ -4,7 +4,7 @@ vi.mock('../llm-processing/cv-html-sanitizer', () => ({
 	sanitizeCvHtml: (html: string) => html
 }));
 
-import { buildPrintableHtml } from './cv-export';
+import { buildPrintableHtmlEditable, buildPrintableHtmlSimple } from './cv-export';
 import {
 	buildPrintableEditablePayloadText,
 	extractPrintableEditablePayload
@@ -28,7 +28,7 @@ describe('cv printable editable payload', () => {
 	});
 
 	it('inyecta la carga editable dentro del HTML imprimible', () => {
-		const printableHtml = buildPrintableHtml(
+		const printableHtml = buildPrintableHtmlEditable(
 			'<section><h2>Experiencia</h2><ul><li>Rawr Labs</li></ul></section>',
 			'#0f766e',
 			'minimal'
@@ -37,5 +37,16 @@ describe('cv printable editable payload', () => {
 		expect(printableHtml).toContain('cv-editable-payload');
 		expect(printableHtml).toContain('CVOPTEDITABLEPAYLOADV1START');
 		expect(printableHtml).toContain('CVOPTEDITABLEPAYLOADV1END');
+	});
+
+	it('mantiene el pdf simple sin la carga editable interna', () => {
+		const printableHtml = buildPrintableHtmlSimple(
+			'<section><h2>Experiencia</h2><ul><li>Rawr Labs</li></ul></section>',
+			'#0f766e',
+			'minimal'
+		);
+
+		expect(printableHtml).not.toContain('CVOPTEDITABLEPAYLOADV1START');
+		expect(printableHtml).not.toContain('CVOPTEDITABLEPAYLOADV1END');
 	});
 });

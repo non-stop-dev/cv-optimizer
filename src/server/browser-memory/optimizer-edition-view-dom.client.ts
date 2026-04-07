@@ -22,6 +22,11 @@ export interface OptimizerEditionViewDom {
 	formatBoldButton: HTMLButtonElement;
 	formatItalicButton: HTMLButtonElement;
 	formatUnderlineButton: HTMLButtonElement;
+	formatBulletListButton: HTMLButtonElement;
+	formatTextSizeSelect: HTMLSelectElement;
+	formatTextColorApplyButton: HTMLButtonElement;
+	formatTextColorPicker: HTMLInputElement;
+	formatTextColorSwatch: HTMLElement;
 	formatLinkButton: HTMLButtonElement;
 }
 
@@ -52,6 +57,11 @@ export const getOptimizerEditionViewDom = (): OptimizerEditionViewDom => {
 	const formatBoldButton = document.querySelector('[data-cv-format-bold]');
 	const formatItalicButton = document.querySelector('[data-cv-format-italic]');
 	const formatUnderlineButton = document.querySelector('[data-cv-format-underline]');
+	const formatBulletListButton = document.querySelector('[data-cv-format-bullet-list]');
+	const formatTextSizeSelect = document.querySelector('[data-cv-format-text-size]');
+	const formatTextColorApplyButton = document.querySelector('[data-cv-format-text-color-apply]');
+	const formatTextColorPicker = document.querySelector('[data-cv-format-text-color-picker]');
+	const formatTextColorSwatch = document.querySelector('[data-cv-format-text-color-swatch]');
 	const formatLinkButton = document.querySelector('[data-cv-format-link]');
 
 	if (
@@ -79,6 +89,11 @@ export const getOptimizerEditionViewDom = (): OptimizerEditionViewDom => {
 		!(formatBoldButton instanceof HTMLButtonElement) ||
 		!(formatItalicButton instanceof HTMLButtonElement) ||
 		!(formatUnderlineButton instanceof HTMLButtonElement) ||
+		!(formatBulletListButton instanceof HTMLButtonElement) ||
+		!(formatTextSizeSelect instanceof HTMLSelectElement) ||
+		!(formatTextColorApplyButton instanceof HTMLButtonElement) ||
+		!(formatTextColorPicker instanceof HTMLInputElement) ||
+		!(formatTextColorSwatch instanceof HTMLElement) ||
 		!(formatLinkButton instanceof HTMLButtonElement)
 	) {
 		throw new Error('No se pudo inicializar la vista dedicada del CV optimizado.');
@@ -108,6 +123,11 @@ export const getOptimizerEditionViewDom = (): OptimizerEditionViewDom => {
 		formatBoldButton,
 		formatItalicButton,
 		formatUnderlineButton,
+		formatBulletListButton,
+		formatTextSizeSelect,
+		formatTextColorApplyButton,
+		formatTextColorPicker,
+		formatTextColorSwatch,
 		formatLinkButton
 	};
 };

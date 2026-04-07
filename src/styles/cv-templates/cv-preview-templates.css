@@ -72,6 +72,46 @@
 	color: var(--cv-ink);
 }
 
+[data-output-preview] .cv-text-size-xs {
+	font-size: 0.78em;
+}
+
+[data-output-preview] .cv-text-size-sm {
+	font-size: 0.9em;
+}
+
+[data-output-preview] .cv-text-size-md {
+	font-size: 1em;
+}
+
+[data-output-preview] .cv-text-size-lg {
+	font-size: 1.15em;
+}
+
+[data-output-preview] .cv-text-size-xl {
+	font-size: 1.3em;
+}
+
+[data-output-preview] .cv-text-color-default {
+	color: inherit;
+}
+
+[data-output-preview] .cv-text-color-muted {
+	color: #667781;
+}
+
+[data-output-preview] .cv-text-color-primary {
+	color: var(--cv-primary);
+}
+
+[data-output-preview] .cv-text-color-accent {
+	color: #7c3aed;
+}
+
+[data-output-preview] .cv-text-color-danger {
+	color: #b42318;
+}
+
 [data-output-preview] .cv-placeholder {
 	display: inline-block;
 	margin: 0 0.15rem;

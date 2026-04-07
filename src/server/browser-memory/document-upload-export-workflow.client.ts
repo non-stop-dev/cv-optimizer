@@ -1,7 +1,7 @@
 import {
 	DEFAULT_CV_TEMPLATE_ID,
 	buildHtmlExportDocument,
-	buildPrintableHtml,
+	buildPrintableHtmlEditable,
 	downloadTextFile,
 	openPrintPreview,
 	toSafeFileName
@@ -66,7 +66,7 @@ export const createDocumentUploadExportWorkflow = (
 			return;
 		}
 
-		const printableHtml = buildPrintableHtml(
+		const printableHtml = buildPrintableHtmlEditable(
 			resultPreview.innerHTML,
 			cvPrimaryColorPicker.value,
 			DEFAULT_CV_TEMPLATE_ID

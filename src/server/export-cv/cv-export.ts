@@ -113,7 +113,27 @@ ${cvMarkup}
 </html>`;
 };
 
-export const buildPrintableHtml = (
+export const buildPrintableHtmlSimple = (
+	html: string,
+	primaryColor: string,
+	templateId: CvTemplateId = DEFAULT_CV_TEMPLATE_ID
+): string => {
+	const safeEditorHtml = sanitizeCvHtml(html);
+	return `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CV optimizado</title>
+  <style>${buildExportCss(primaryColor, templateId)}</style>
+</head>
+<body>
+  <article class="cv-doc">${safeEditorHtml}</article>
+</body>
+</html>`;
+};
+
+export const buildPrintableHtmlEditable = (
 	html: string,
 	primaryColor: string,
 	templateId: CvTemplateId = DEFAULT_CV_TEMPLATE_ID
@@ -135,6 +155,34 @@ export const buildPrintableHtml = (
 <body>
   <article class="cv-doc">${safeEditorHtml}</article>
   ${printablePayloadBlock}
+</body>
+</html>`;
+};
+
+export const buildWordExportDocument = (
+	html: string,
+	primaryColor: string,
+	templateId: CvTemplateId = DEFAULT_CV_TEMPLATE_ID
+): string => {
+	const safeEditorHtml = sanitizeCvHtml(html);
+	return `<!doctype html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="ProgId" content="Word.Document" />
+  <meta name="Generator" content="CV Optimizer" />
+  <meta name="Originator" content="CV Optimizer" />
+  <title>CV optimizado</title>
+  <style>
+    ${buildExportCss(primaryColor, templateId)}
+    @page {
+      size: A4;
+      margin: 1.7cm;
+    }
+  </style>
+</head>
+<body>
+  <article class="cv-doc">${safeEditorHtml}</article>
 </body>
 </html>`;
 };

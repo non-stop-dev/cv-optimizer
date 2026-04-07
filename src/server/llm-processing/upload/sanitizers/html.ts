@@ -36,7 +36,12 @@ const SANITIZE_OPTIONS: IOptions = {
 	],
 	allowedAttributes: {
 		a: ['href', 'title', 'target', 'rel'],
-		'*': ['class']
+		'*': ['class', 'style']
+	},
+	allowedStyles: {
+		'*': {
+			color: [/^#[0-9a-fA-F]{6}$/]
+		}
 	},
 	allowedSchemes: ['http', 'https', 'mailto', 'tel'],
 	allowedSchemesAppliedToAttributes: ['href'],

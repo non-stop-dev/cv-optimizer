@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
 	upsertHistoryEntry: vi.fn(),
 	applyPreviewPrimaryColor: vi.fn(),
 	downloadTextFile: vi.fn(),
+	openPrintPreview: vi.fn(),
 	detectBrowserTranslationCapability: vi.fn(),
 	translateHtmlWithBrowserLocalApi: vi.fn(),
 	translateCvToEnglishWithLlmRemote: vi.fn()
@@ -37,8 +38,10 @@ vi.mock('../export-cv/cv-export', () => ({
 		return 'default';
 	},
 	buildHtmlExportDocument: () => '<html></html>',
-	buildPrintableHtml: () => '<html></html>',
-	openPrintPreview: () => true
+	buildPrintableHtmlSimple: () => '<html-simple></html-simple>',
+	buildPrintableHtmlEditable: () => '<html-editable></html-editable>',
+	buildWordExportDocument: () => '<html-word></html-word>',
+	openPrintPreview: mocks.openPrintPreview
 }));
 
 vi.mock('./optimizer-edition-translation-browser-local.client', () => ({
@@ -78,13 +81,23 @@ const buildEditionDom = (): void => {
 				<button data-cv-format-bold type="button"></button>
 				<button data-cv-format-italic type="button"></button>
 				<button data-cv-format-underline type="button"></button>
+				<button data-cv-format-bullet-list type="button"></button>
+				<select data-cv-format-text-size>
+					<option value="cv-text-size-md">M</option>
+					<option value="cv-text-size-lg">L</option>
+				</select>
+				<button data-cv-format-text-color-apply type="button">A</button>
+				<span data-cv-format-text-color-swatch></span>
+				<input data-cv-format-text-color-picker type="color" value="#0f766e" />
 				<button data-cv-format-link type="button"></button>
 				<div data-cv-export-shell>
 					<button data-cv-export-trigger type="button"></button>
 					<div data-cv-export-list hidden>
 						<button data-cv-export-option="html" type="button"></button>
 						<button data-cv-export-option="txt" type="button"></button>
-						<button data-cv-export-option="pdf" type="button"></button>
+						<button data-cv-export-option="word" type="button"></button>
+						<button data-cv-export-option="pdf-simple" type="button"></button>
+						<button data-cv-export-option="pdf-editable" type="button"></button>
 					</div>
 				</div>
 				<div data-output-preview contenteditable="true"></div>
@@ -97,6 +110,19 @@ const buildEditionDom = (): void => {
 const flushAsync = async (): Promise<void> => {
 	await Promise.resolve();
 	await Promise.resolve();
+};
+
+const selectNodeContents = (node: Node): void => {
+	const selection = window.getSelection();
+	if (!selection) {
+		throw new Error('Selection API no disponible.');
+	}
+
+	const range = document.createRange();
+	range.selectNodeContents(node);
+	selection.removeAllRanges();
+	selection.addRange(range);
+	document.dispatchEvent(new Event('selectionchange'));
 };
 
 const loadClientModule = async (): Promise<void> => {
@@ -124,6 +150,7 @@ beforeEach(() => {
 		targetPositions: ['Analista de datos']
 	});
 	mocks.upsertHistoryEntry.mockResolvedValue(undefined);
+	mocks.openPrintPreview.mockReturnValue(true);
 	mocks.detectBrowserTranslationCapability.mockResolvedValue('llm-remote-only');
 	mocks.translateHtmlWithBrowserLocalApi.mockResolvedValue(null);
 	mocks.translateCvToEnglishWithLlmRemote.mockResolvedValue('<p>Translated</p>');
@@ -268,12 +295,13 @@ describe('optimizer-edition-view client flow', () => {
 		);
 	});
 
-	it('exporta desde el menu compacto de formatos', async () => {
+	it('exporta html y word desde el menu compacto de formatos', async () => {
 		await loadClientModule();
 
 		const exportTrigger = document.querySelector('[data-cv-export-trigger]') as HTMLButtonElement;
 		const exportList = document.querySelector('[data-cv-export-list]') as HTMLElement;
 		const htmlOption = document.querySelector('[data-cv-export-option="html"]') as HTMLButtonElement;
+		const wordOption = document.querySelector('[data-cv-export-option="word"]') as HTMLButtonElement;
 
 		expect(exportList.hidden).toBe(true);
 
@@ -287,6 +315,70 @@ describe('optimizer-edition-view client flow', () => {
 			'<html></html>',
 			'text/html;charset=utf-8'
 		);
+
+		exportTrigger.click();
+		wordOption.click();
+		expect(mocks.downloadTextFile).toHaveBeenCalledWith(
+			'cv-test.doc',
+			'<html-word></html-word>',
+			'application/msword'
+		);
+	});
+
+	it('permite elegir entre pdf simple y pdf editable', async () => {
+		await loadClientModule();
+
+		const exportTrigger = document.querySelector('[data-cv-export-trigger]') as HTMLButtonElement;
+		const simplePdfOption = document.querySelector('[data-cv-export-option="pdf-simple"]') as HTMLButtonElement;
+		const editablePdfOption = document.querySelector('[data-cv-export-option="pdf-editable"]') as HTMLButtonElement;
+		const statusMessage = document.querySelector('[data-output-status-message]');
+
+		exportTrigger.click();
+		simplePdfOption.click();
+		expect(mocks.openPrintPreview).toHaveBeenLastCalledWith('<html-simple></html-simple>');
+		expect(statusMessage?.textContent).toContain('PDF simple');
+
+		exportTrigger.click();
+		editablePdfOption.click();
+		expect(mocks.openPrintPreview).toHaveBeenLastCalledWith('<html-editable></html-editable>');
+		expect(statusMessage?.textContent).toContain('PDF editable en CV Optimizer');
+	});
+
+	it('sincroniza el picker con el color del texto seleccionado', async () => {
+		await loadClientModule();
+
+		const preview = document.querySelector('[data-output-preview]') as HTMLElement;
+		const colorPicker = document.querySelector(
+			'[data-cv-format-text-color-picker]'
+		) as HTMLInputElement;
+
+		preview.innerHTML =
+			'<p><span class="cv-text-color-custom" style="color: #ff6600;">Texto coloreado</span></p>';
+		const selectedText = preview.querySelector('span')?.firstChild as Node;
+		selectNodeContents(selectedText);
+
+		expect(colorPicker.value).toBe('#ff6600');
+	});
+
+	it('aplica el color actual del selector cuando se pulsa la A', async () => {
+		await loadClientModule();
+
+		const preview = document.querySelector('[data-output-preview]') as HTMLElement;
+		const colorPicker = document.querySelector(
+			'[data-cv-format-text-color-picker]'
+		) as HTMLInputElement;
+		const applyColorButton = document.querySelector(
+			'[data-cv-format-text-color-apply]'
+		) as HTMLButtonElement;
+
+		preview.innerHTML = '<p>Texto base</p>';
+		selectNodeContents(preview.querySelector('p')?.firstChild as Node);
+		colorPicker.value = '#0088ff';
+		applyColorButton.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+		applyColorButton.click();
+
+		expect(preview.innerHTML).toContain('cv-text-color-custom');
+		expect(preview.innerHTML.toLowerCase()).toContain('rgb(0, 136, 255)');
 	});
 
 	it('muestra en el tooltip si intentara usar la API local del navegador', async () => {
